@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="program,源码解析," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="在上一篇中，我们分析了play的2种启动方式，这一篇，我们来看看Play类的初始化过程">
+<meta name="keywords" content="program,源码解析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Play framework源码解析 Part3:Play的初始化与启动">
+<meta property="og:url" content="http://luyanliang.top/Play-framework源码解析-Part3-Play的初始化与启动.html">
+<meta property="og:site_name" content="404 not found">
+<meta property="og:description" content="在上一篇中，我们分析了play的2种启动方式，这一篇，我们来看看Play类的初始化过程">
+<meta property="og:image" content="https://s1.ax1x.com/2018/02/01/9FqoHU.png">
+<meta property="og:updated_time" content="2018-02-12T11:21:00.001Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Play framework源码解析 Part3:Play的初始化与启动">
+<meta name="twitter:description" content="在上一篇中，我们分析了play的2种启动方式，这一篇，我们来看看Play类的初始化过程">
+<meta name="twitter:image" content="https://s1.ax1x.com/2018/02/01/9FqoHU.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://luyanliang.top/Play-framework源码解析-Part3-Play的初始化与启动.html"/>
+
+
+
+
+
+  <title>Play framework源码解析 Part3:Play的初始化与启动 | 404 not found</title>
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-109062760-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">404 not found</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'jPjTak7tUxEbrqgszu_j','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://luyanliang.top/Play-framework源码解析-Part3-Play的初始化与启动.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="苗苗">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="404 not found">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Play framework源码解析 Part3:Play的初始化与启动</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-20T15:52:41+08:00">
+                2018-01-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/program/" itemprop="url" rel="index">
+                    <span itemprop="name">program</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/program/java/" itemprop="url" rel="index">
+                    <span itemprop="name">java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/Play-framework源码解析-Part3-Play的初始化与启动.html" class="leancloud_visitors" data-flag-title="Play framework源码解析 Part3:Play的初始化与启动">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在上一篇中，我们分析了play的2种启动方式，这一篇，我们来看看Play类的初始化过程</p>
+<a id="more"></a>
+<h1 id="Play类"><a href="#Play类" class="headerlink" title="Play类"></a>Play类</h1><p>无论是Server还是ServletWrapper方式运行，在他们的入口中都会运行Play.init()来对Play类进行初始化。那在解析初始化之前，我们先来看看Play类是做什么的，它里面有什么重要的方法。<br>首先要明确的一点是，Play类是整个Play framework框架的管理、配置中心，它存放了大部分框架需要的成员变量，例如id,配置信息,所有加载的class,使用的插件管理器等等。下图就是Play类中的方法列表。<br><img src="https://s1.ax1x.com/2018/02/01/9FqoHU.png" alt="Play类的方法列表"><br>这其中加注释的几个方法是比较重要的，我们下面便来从init开始一点点剖析Play类中的各个方法。</p>
+<h1 id="Play的初始化"><a href="#Play的初始化" class="headerlink" title="Play的初始化"></a>Play的初始化</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">(File root, String id)</span> </span>&#123;</div><div class="line">    <span class="comment">// Simple things</span></div><div class="line">    Play.id = id;</div><div class="line">    Play.started = <span class="keyword">false</span>;</div><div class="line">    Play.applicationPath = root;</div><div class="line"></div><div class="line">    <span class="comment">// 加载所有 play.static 中的记录的类</span></div><div class="line">    initStaticStuff();</div><div class="line">    <span class="comment">//猜测play framework的路径</span></div><div class="line">    guessFrameworkPath();</div><div class="line"></div><div class="line">    <span class="comment">// 读取配置文件</span></div><div class="line">    readConfiguration();</div><div class="line"></div><div class="line">    Play.classes = <span class="keyword">new</span> ApplicationClasses();</div><div class="line"></div><div class="line">    <span class="comment">// 初始化日志</span></div><div class="line">    Logger.init();</div><div class="line">    String logLevel = configuration.getProperty(<span class="string">"application.log"</span>, <span class="string">"INFO"</span>);</div><div class="line"></div><div class="line">    <span class="comment">//only override log-level if Logger was not configured manually</span></div><div class="line">    <span class="keyword">if</span>( !Logger.configuredManually) &#123;</div><div class="line">        Logger.setUp(logLevel);</div><div class="line">    &#125;</div><div class="line">    Logger.recordCaller = Boolean.parseBoolean(configuration.getProperty(<span class="string">"application.log.recordCaller"</span>, <span class="string">"false"</span>));</div><div class="line"></div><div class="line">    Logger.info(<span class="string">"Starting %s"</span>, root.getAbsolutePath());</div><div class="line">    <span class="comment">//设置临时文件夹</span></div><div class="line">    <span class="keyword">if</span> (configuration.getProperty(<span class="string">"play.tmp"</span>, <span class="string">"tmp"</span>).equals(<span class="string">"none"</span>)) &#123;</div><div class="line">        tmpDir = <span class="keyword">null</span>;</div><div class="line">        Logger.debug(<span class="string">"No tmp folder will be used (play.tmp is set to none)"</span>);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        tmpDir = <span class="keyword">new</span> File(configuration.getProperty(<span class="string">"play.tmp"</span>, <span class="string">"tmp"</span>));</div><div class="line">        <span class="keyword">if</span> (!tmpDir.isAbsolute()) &#123;</div><div class="line">            tmpDir = <span class="keyword">new</span> File(applicationPath, tmpDir.getPath());</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (Logger.isTraceEnabled()) &#123;</div><div class="line">            Logger.trace(<span class="string">"Using %s as tmp dir"</span>, Play.tmpDir);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (!tmpDir.exists()) &#123;</div><div class="line">            <span class="keyword">try</span> &#123;</div><div class="line">                <span class="keyword">if</span> (readOnlyTmp) &#123;</div><div class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> Exception(<span class="string">"ReadOnly tmp"</span>);</div><div class="line">                &#125;</div><div class="line">                tmpDir.mkdirs();</div><div class="line">            &#125; <span class="keyword">catch</span> (Throwable e) &#123;</div><div class="line">                tmpDir = <span class="keyword">null</span>;</div><div class="line">                Logger.warn(<span class="string">"No tmp folder will be used (cannot create the tmp dir)"</span>);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// 设置运行模式</span></div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        mode = Mode.valueOf(configuration.getProperty(<span class="string">"application.mode"</span>, <span class="string">"DEV"</span>).toUpperCase());</div><div class="line">    &#125; <span class="keyword">catch</span> (IllegalArgumentException e) &#123;</div><div class="line">        Logger.error(<span class="string">"Illegal mode '%s', use either prod or dev"</span>, configuration.getProperty(<span class="string">"application.mode"</span>));</div><div class="line">        fatalServerErrorOccurred();</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> (usePrecompiled || forceProd) &#123;</div><div class="line">        mode = Mode.PROD;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// 获取http使用路径</span></div><div class="line">    ctxPath = configuration.getProperty(<span class="string">"http.path"</span>, ctxPath);</div><div class="line"></div><div class="line">    <span class="comment">// 设置文件路径</span></div><div class="line">    VirtualFile appRoot = VirtualFile.open(applicationPath);</div><div class="line">    roots.add(appRoot);</div><div class="line">    javaPath = <span class="keyword">new</span> CopyOnWriteArrayList&lt;VirtualFile&gt;();</div><div class="line">    javaPath.add(appRoot.child(<span class="string">"app"</span>));</div><div class="line">    javaPath.add(appRoot.child(<span class="string">"conf"</span>));</div><div class="line"></div><div class="line">    <span class="comment">// 设置模板路径</span></div><div class="line">    <span class="keyword">if</span> (appRoot.child(<span class="string">"app/views"</span>).exists()) &#123;</div><div class="line">        templatesPath = <span class="keyword">new</span> ArrayList&lt;VirtualFile&gt;(<span class="number">2</span>);</div><div class="line">        templatesPath.add(appRoot.child(<span class="string">"app/views"</span>));</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        templatesPath = <span class="keyword">new</span> ArrayList&lt;VirtualFile&gt;(<span class="number">1</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// 设置路由文件</span></div><div class="line">    routes = appRoot.child(<span class="string">"conf/routes"</span>);</div><div class="line"></div><div class="line">    <span class="comment">// 设置模块路径</span></div><div class="line">    modulesRoutes = <span class="keyword">new</span> HashMap&lt;String, VirtualFile&gt;(<span class="number">16</span>);</div><div class="line"></div><div class="line">    <span class="comment">// 加载模块</span></div><div class="line">    loadModules();</div><div class="line"></div><div class="line">    <span class="comment">// 模板路径中加入框架自带的模板文件</span></div><div class="line">    templatesPath.add(VirtualFile.open(<span class="keyword">new</span> File(frameworkPath, <span class="string">"framework/templates"</span>)));</div><div class="line"></div><div class="line">    <span class="comment">// 初始化classloader</span></div><div class="line">    classloader = <span class="keyword">new</span> ApplicationClassloader();</div><div class="line"></div><div class="line">    <span class="comment">// Fix ctxPath</span></div><div class="line">    <span class="keyword">if</span> (<span class="string">"/"</span>.equals(Play.ctxPath)) &#123;</div><div class="line">        Play.ctxPath = <span class="string">""</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// 设置cookie域名</span></div><div class="line">    Http.Cookie.defaultDomain = configuration.getProperty(<span class="string">"application.defaultCookieDomain"</span>, <span class="keyword">null</span>);</div><div class="line">    <span class="keyword">if</span> (Http.Cookie.defaultDomain!=<span class="keyword">null</span>) &#123;</div><div class="line">        Logger.info(<span class="string">"Using default cookie domain: "</span> + Http.Cookie.defaultDomain);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// 加载插件</span></div><div class="line">    pluginCollection.loadPlugins();</div><div class="line"></div><div class="line">    <span class="comment">// 如果是prod直接启动</span></div><div class="line">    <span class="keyword">if</span> (mode == Mode.PROD || System.getProperty(<span class="string">"precompile"</span>) != <span class="keyword">null</span>) &#123;</div><div class="line">        mode = Mode.PROD;</div><div class="line">        <span class="comment">//预编译</span></div><div class="line">        <span class="keyword">if</span> (preCompile() &amp;&amp; System.getProperty(<span class="string">"precompile"</span>) == <span class="keyword">null</span>) &#123;</div><div class="line">            start();</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">return</span>;</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        Logger.warn(<span class="string">"You're running Play! in DEV mode"</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    pluginCollection.onApplicationReady();</div><div class="line"></div><div class="line">    Play.initialized = <span class="keyword">true</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>如上面的代码所示，初始化过程主要的顺序为：</p>
+<ol>
+<li>加载所有play.static中记录的类</li>
+<li>获取框架路径</li>
+<li>读取配置文件</li>
+<li>初始化日志</li>
+<li>获取java文件、模板文件路径</li>
+<li>加载模块</li>
+<li>加载插件</li>
+<li>若为prod模式进行预编译</li>
+</ol>
+<p>我们来依次看看Play在这些过程中做了什么事情。</p>
+<h2 id="加载play-static"><a href="#加载play-static" class="headerlink" title="加载play.static"></a>加载play.static</h2><p>Play在初始化过程中会调用initStaticStuff()方法来检查代码目录下是否存在play.static文件，如果存在，那么就逐行读取文件中记录的类，并通过反射加载类中的静态初始化代码段。至于作用吗，不知道有什么用，这段代码的优先级太高了，早于初始化过程运行，若在初始化过程结束后运行还可以用来覆写Play类中的配置信息。<del>或者自己写插件然后在play.static中初始化插件依赖？或者绑定新的数据源？</del></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">initStaticStuff</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="comment">// Play! plugings</span></div><div class="line">    Enumeration&lt;URL&gt; urls = <span class="keyword">null</span>;</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        urls = Play.class.getClassLoader().getResources(<span class="string">"play.static"</span>);</div><div class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">while</span> (urls != <span class="keyword">null</span> &amp;&amp; urls.hasMoreElements()) &#123;</div><div class="line">        URL url = urls.nextElement();</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            BufferedReader reader = <span class="keyword">new</span> BufferedReader(<span class="keyword">new</span> InputStreamReader(url.openStream(), <span class="string">"utf-8"</span>));</div><div class="line">            String line = <span class="keyword">null</span>;</div><div class="line">            <span class="keyword">while</span> ((line = reader.readLine()) != <span class="keyword">null</span>) &#123;</div><div class="line">                <span class="keyword">try</span> &#123;</div><div class="line">                    Class.forName(line);</div><div class="line">                &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">                    Logger.warn(<span class="string">"! Cannot init static: "</span> + line);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125; <span class="keyword">catch</span> (Exception ex) &#123;</div><div class="line">            Logger.error(ex, <span class="string">"Cannot load %s"</span>, url);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="获取框架路径"><a href="#获取框架路径" class="headerlink" title="获取框架路径"></a>获取框架路径</h2><p>获取框架路径很简单，就是判断是用jar模式运行还是直接用文件运行，然后读取对应的路径</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">guessFrameworkPath</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="comment">// Guess the framework path</span></div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        URL versionUrl = Play.class.getResource(<span class="string">"/play/version"</span>);</div><div class="line">        <span class="comment">// Read the content of the file</span></div><div class="line">        Play.version = <span class="keyword">new</span> LineNumberReader(<span class="keyword">new</span> InputStreamReader(versionUrl.openStream())).readLine();</div><div class="line"></div><div class="line">        <span class="comment">// This is used only by the embedded server (Mina, Netty, Jetty etc)</span></div><div class="line">        URI uri = <span class="keyword">new</span> URI(versionUrl.toString().replace(<span class="string">" "</span>, <span class="string">"%20"</span>));</div><div class="line">        <span class="keyword">if</span> (frameworkPath == <span class="keyword">null</span> || !frameworkPath.exists()) &#123;</div><div class="line">            <span class="keyword">if</span> (uri.getScheme().equals(<span class="string">"jar"</span>)) &#123;</div><div class="line">                String jarPath = uri.getSchemeSpecificPart().substring(<span class="number">5</span>, uri.getSchemeSpecificPart().lastIndexOf(<span class="string">"!"</span>));</div><div class="line">                frameworkPath = <span class="keyword">new</span> File(jarPath).getParentFile().getParentFile().getAbsoluteFile();</div><div class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (uri.getScheme().equals(<span class="string">"file"</span>)) &#123;</div><div class="line">                frameworkPath = <span class="keyword">new</span> File(uri).getParentFile().getParentFile().getParentFile().getParentFile();</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> UnexpectedException(<span class="string">"Cannot find the Play! framework - trying with uri: "</span> + uri + <span class="string">" scheme "</span> + uri.getScheme());</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> UnexpectedException(<span class="string">"Where is the framework ?"</span>, e);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="读取配置文件"><a href="#读取配置文件" class="headerlink" title="读取配置文件"></a>读取配置文件</h2><p>首先要说明一下，我们这里讨论的是在Play类初始化过程中的读取配置文件过程，为什么要指出这一点呢，因为配置文件读取后会调用插件的onConfigurationRead方法，而在初始化过程中，配置文件是优先于插件加载的，所以在初始化过程中插件的方法并不会生效。等到Play调用start方法启动服务器时，会重新读取配置文件，那时候插件列表已经更新完毕，会执行onConfigurationRead方法。<br>配置文件的读取和启动脚本中的解析方式基本一样，步骤就是下面几步：</p>
+<ol>
+<li>读取application.conf，将其中的项全部加入Properties</li>
+<li>将所有配置项用正则过滤找出真实配置名，并找出所用id的配置项替换</li>
+<li>将配置项中的${..}替换为对应值</li>
+<li>读取@include引用的配置</li>
+</ol>
+<p>我们来看下play对${..}替换过程<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">Pattern pattern = Pattern.compile(<span class="string">"\\$\\&#123;([^&#125;]+)&#125;"</span>);</div><div class="line"><span class="keyword">for</span> (Object key : propsFromFile.keySet()) &#123;</div><div class="line">    String value = propsFromFile.getProperty(key.toString());</div><div class="line">    Matcher matcher = pattern.matcher(value);</div><div class="line">    StringBuffer newValue = <span class="keyword">new</span> StringBuffer(<span class="number">100</span>);</div><div class="line">    <span class="keyword">while</span> (matcher.find()) &#123;</div><div class="line">        String jp = matcher.group(<span class="number">1</span>);</div><div class="line">        String r;</div><div class="line">        <span class="comment">//重点是下面这个判断</span></div><div class="line">        <span class="keyword">if</span> (jp.equals(<span class="string">"application.path"</span>)) &#123;</div><div class="line">            r = Play.applicationPath.getAbsolutePath();</div><div class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (jp.equals(<span class="string">"play.path"</span>)) &#123;</div><div class="line">            r = Play.frameworkPath.getAbsolutePath();</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            r = System.getProperty(jp);</div><div class="line">            <span class="keyword">if</span> (r == <span class="keyword">null</span>) &#123;</div><div class="line">                r = System.getenv(jp);</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">if</span> (r == <span class="keyword">null</span>) &#123;</div><div class="line">                Logger.warn(<span class="string">"Cannot replace %s in configuration (%s=%s)"</span>, jp, key, value);</div><div class="line">                <span class="keyword">continue</span>;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        matcher.appendReplacement(newValue, r.replaceAll(<span class="string">"\\\\"</span>, <span class="string">"\\\\\\\\"</span>));</div><div class="line">    &#125;</div><div class="line">    matcher.appendTail(newValue);</div><div class="line">    propsFromFile.setProperty(key.toString(), newValue.toString());</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>可以看出除了${application.path}和${play.path}，我们还可以通过使用参数和修改环境变量来添加可替换的值</p>
+<h2 id="初始化日志"><a href="#初始化日志" class="headerlink" title="初始化日志"></a>初始化日志</h2><p>Play的日志处理放在Logger类中，默认使用log4j作为日志记录工具，初始化过程的顺序如下</p>
+<ol>
+<li>查找配置文件中是否有日志配置文件路径，存在跳至4</li>
+<li>查找是否有log4j.xml，存在跳至4</li>
+<li>查找是否有log4j.properties，存在跳至4</li>
+<li>根据文件后缀使用对应的日志配置解析器</li>
+<li>如果是测试模式则加上写入测试结果文件的Appender</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="comment">//查找日志配置文件路径，没有则用log4j.xml</span></div><div class="line">    String log4jPath = Play.configuration.getProperty(<span class="string">"application.log.path"</span>, <span class="string">"/log4j.xml"</span>);</div><div class="line">    URL log4jConf = Logger.class.getResource(log4jPath);</div><div class="line">    <span class="keyword">boolean</span> isXMLConfig = log4jPath.endsWith(<span class="string">".xml"</span>);</div><div class="line">    <span class="comment">//日志配置不存在，查找log4j.properties</span></div><div class="line">    <span class="keyword">if</span> (log4jConf == <span class="keyword">null</span>) &#123; <span class="comment">// try again with the .properties</span></div><div class="line">        isXMLConfig = <span class="keyword">false</span>;</div><div class="line">        log4jPath = Play.configuration.getProperty(<span class="string">"application.log.path"</span>, <span class="string">"/log4j.properties"</span>);</div><div class="line">        log4jConf = Logger.class.getResource(log4jPath);</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//找不到配置文件就关闭日志</span></div><div class="line">    <span class="keyword">if</span> (log4jConf == <span class="keyword">null</span>) &#123;</div><div class="line">        Properties shutUp = <span class="keyword">new</span> Properties();</div><div class="line">        shutUp.setProperty(<span class="string">"log4j.rootLogger"</span>, <span class="string">"OFF"</span>);</div><div class="line">        PropertyConfigurator.configure(shutUp);</div><div class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (Logger.log4j == <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="comment">//判断日志配置文件是否在应用目录下，加这条是因为play软件包目录下有默认的日志配置文件</span></div><div class="line">        <span class="keyword">if</span> (log4jConf.getFile().indexOf(Play.applicationPath.getAbsolutePath()) == <span class="number">0</span>) &#123;</div><div class="line">            <span class="comment">// The log4j configuration file is located somewhere in the application folder,</span></div><div class="line">            <span class="comment">// so it's probably a custom configuration file</span></div><div class="line">            configuredManually = <span class="keyword">true</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="comment">//根据不同的类型解析</span></div><div class="line">        <span class="keyword">if</span> (isXMLConfig) &#123;</div><div class="line">            DOMConfigurator.configure(log4jConf);</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            PropertyConfigurator.configure(log4jConf);</div><div class="line">        &#125;</div><div class="line">        Logger.log4j = org.apache.log4j.Logger.getLogger(<span class="string">"play"</span>);</div><div class="line">        <span class="comment">// 测试模式下，将日志追加到test-result/application.log</span></div><div class="line">        <span class="keyword">if</span> (Play.runingInTestMode()) &#123;</div><div class="line">            org.apache.log4j.Logger rootLogger = org.apache.log4j.Logger.getRootLogger();</div><div class="line">            <span class="keyword">try</span> &#123;</div><div class="line">                <span class="keyword">if</span> (!Play.getFile(<span class="string">"test-result"</span>).exists()) &#123;</div><div class="line">                    Play.getFile(<span class="string">"test-result"</span>).mkdir();</div><div class="line">                &#125;</div><div class="line">                Appender testLog = <span class="keyword">new</span> FileAppender(<span class="keyword">new</span> PatternLayout(<span class="string">"%d&#123;DATE&#125; %-5p ~ %m%n"</span>), Play.getFile(<span class="string">"test-result/application.log"</span>).getAbsolutePath(), <span class="keyword">false</span>);</div><div class="line">                rootLogger.addAppender(testLog);</div><div class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">                e.printStackTrace();</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>初始化的代码可以看出log4j.xml的优先级高于log4j.properties，这里可以发现一个问题，Play的日志初始化完全是针对log4j来进行的，但是翻看Logger类的代码可以看到，所有的日志输出方法都会先判断是否使用java.util.logging.Logger来输出日志，在Logger类中也有一个forceJuli字段来判断是否使用，但是这个字段一直没有使用过，也就是说只要不手动改，那forceJuli一直是false。<br>如果没有做任何配置，那么直接使用Logger来输出日志，那么显示的类名就只会是Play，需要在配置文件中加入application.log.recordCaller=true来将日志输出时显示的类变为调用类名</p>
+<h2 id="查找文件路径"><a href="#查找文件路径" class="headerlink" title="查找文件路径"></a>查找文件路径</h2><p>Play类中记录的路径有5种，分别为根目录路径，java文件路径，模板文件路径，主路由路径，模块路由路径。文件路径的添加很简单，就是将文件路径记录在对应的变量中，这里要提的一点是，conf文件夹是被加入到java文件路径中的，所以写在conf文件夹中的java源码也是可以使用的。<del>当然，在conf文件夹里写源码大概会被骂死</del></p>
+<h2 id="加载模块"><a href="#加载模块" class="headerlink" title="加载模块"></a>加载模块</h2><p>Play通过调用loadModules()来加载所有模块，使用的模块在3个地方查找，1是系统环境变量，环境变量MODULES记录的模块将加载，2是配置文件中记录的模块，配置信息为module.开头的模块被加载，3是应用目录下的modules文件夹下的模块被加载。在查找完毕后，会判断是否使用测试模式，是则加入_testrunner模块，并判断是否为dev模式，是则会加入_docviewer模块。<br>这里我们来看下Play将模块文件加入应用是如何做的<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">addModule</span><span class="params">(String name, File path)</span> </span>&#123;</div><div class="line">    VirtualFile root = VirtualFile.open(path);</div><div class="line">    modules.put(name, root);</div><div class="line">    <span class="keyword">if</span> (root.child(<span class="string">"app"</span>).exists()) &#123;</div><div class="line">        javaPath.add(root.child(<span class="string">"app"</span>));</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> (root.child(<span class="string">"app/views"</span>).exists()) &#123;</div><div class="line">        templatesPath.add(root.child(<span class="string">"app/views"</span>));</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> (root.child(<span class="string">"conf/routes"</span>).exists()) &#123;</div><div class="line">        modulesRoutes.put(name, root.child(<span class="string">"conf/routes"</span>));</div><div class="line">    &#125;</div><div class="line">    roots.add(root);</div><div class="line">    <span class="keyword">if</span> (!name.startsWith(<span class="string">"_"</span>)) &#123;</div><div class="line">        Logger.info(<span class="string">"Module %s is available (%s)"</span>, name, path.getAbsolutePath());</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>可以看出引入模块其实就是在各个路径下加入模块路径</p>
+<h2 id="加载插件"><a href="#加载插件" class="headerlink" title="加载插件"></a>加载插件</h2><p>插件(plugins)是Play framework框架非常重要的组成部分，插件作用于Play运行时的方方面面，包括请求前后的处理，更新字节码等等，具体的插件使用说明我们放在之后的插件篇再说，这里就说说加载插件的过程。<br>插件的加载过程如下：</p>
+<ol>
+<li>查找java文件路径下存在的play.plugins文件</li>
+<li>读取每一个play.plugins，play.plugins中的记录由2部分组成，一个是插件优先级，一个是类名，逐行读取后根据优先级和类目组成LoadingPluginInfo，并加入List<loadingplugininfo></loadingplugininfo></li>
+<li>根据优先级对List<loadingplugininfo>排序</loadingplugininfo></li>
+<li>根据排序完后的列表依次将插件加入至所有插件列表</li>
+<li>初始化插件</li>
+<li>更新插件列表</li>
+</ol>
+<p>我们先来看看将插件加入所有插件列表的过程<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">boolean</span> <span class="title">addPlugin</span><span class="params">( PlayPlugin plugin )</span></span>&#123;</div><div class="line">    <span class="keyword">synchronized</span>( lock )&#123;</div><div class="line">        <span class="comment">//判断插件列表是否存在插件</span></div><div class="line">        <span class="keyword">if</span>( !allPlugins.contains(plugin) )&#123;</div><div class="line">            allPlugins.add( plugin );</div><div class="line">            <span class="comment">//根据优先级排序</span></div><div class="line">            Collections.sort(allPlugins);</div><div class="line">            <span class="comment">//创建只读的插件列表</span></div><div class="line">            allPlugins_readOnlyCopy = createReadonlyCopy( allPlugins);</div><div class="line">            <span class="comment">//启用插件</span></div><div class="line">            enablePlugin(plugin);</div><div class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这是启用插件的方法<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">enablePlugin</span><span class="params">( PlayPlugin plugin )</span></span>&#123;</div><div class="line">    <span class="keyword">synchronized</span>( lock )&#123;</div><div class="line">        <span class="comment">//检查是否存在插件</span></div><div class="line">        <span class="keyword">if</span>( allPlugins.contains( plugin ))&#123;</div><div class="line">            <span class="comment">//检查插件是否已在启动列表</span></div><div class="line">            <span class="keyword">if</span>( !enabledPlugins.contains( plugin ))&#123;</div><div class="line">                <span class="comment">//加入启动插件</span></div><div class="line">                enabledPlugins.add( plugin );</div><div class="line">                <span class="comment">//排序</span></div><div class="line">                Collections.sort( enabledPlugins);</div><div class="line">                <span class="comment">//创建只读列表</span></div><div class="line">                enabledPlugins_readOnlyCopy = createReadonlyCopy( enabledPlugins);</div><div class="line">                <span class="comment">//更新插件列表</span></div><div class="line">                updatePlayPluginsList();</div><div class="line">                Logger.trace(<span class="string">"Plugin "</span> + plugin + <span class="string">" enabled"</span>);</div><div class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这里有一个问题是，既然加入插件列表时会进行排序，那对List<loadingplugininfo>的排序是否就不需要了呢，其实不是的，因为在加入插件列表时会反射生成PlayPlugin的一个实例，如果实例的静态代码段对插件进行了修改，就会出现问题。<br>在插件加入完毕后，会循环列表进行插件的初始化</loadingplugininfo></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">for</span>( PlayPlugin plugin : getEnabledPlugins())&#123;</div><div class="line">    <span class="keyword">if</span>( isEnabled(plugin))&#123;</div><div class="line">        initializePlugin(plugin);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这里为什么要在循环里再判断一遍插件是否启用呢，是为了让高优先级插件可以禁用低优先级插件。</p>
+<h2 id="预编译"><a href="#预编译" class="headerlink" title="预编译"></a>预编译</h2><p>预编译是为了在prod模式下加快加载速度，预编译方法的作用是将已经预编译好的文件读入或对文件进行预编译，对文件预编译包括了java文件的预编译以及模板文件的预编译，我们分别来看看</p>
+<h3 id="java预编译"><a href="#java预编译" class="headerlink" title="java预编译"></a>java预编译</h3><p>在细说java预编译过程之前，我觉得有必要先来说一下play framework的类加载机制。<br>play.classloading.ApplicationClassloader是play框架的类加载器，所有play框架的代码均由ApplicationClassloader来加载。使用自建的类加载器主要是为了便于处理预编译后的字节码以及方便在dev模式下进行即时的热更新。<br>play.classloading.ApplicationClasses类是应用代码的容器，里面存放了所有的class。<br>ApplicationClassloader调用通过查找ApplicationClasses来获取对应的类代码（具体来说没有这么简单，因为这边只谈预编译，所以具体的流程暂且不谈，在之后的classloader篇再细说）<br>java预编译的入口在ApplicationClassloader.getAllClasses();它的过程如下：</p>
+<ol>
+<li>检查插件是否有编译源码的方法，若有跳至4</li>
+<li>扫描之前设定的javaPath下存在的java文件，读取类名，创建ApplicationClass，ApplicationClass类内有类名、java文件、java代码、编译后字节码、增强后字节码等字段，ApplicationClasses中存放的就是一个个ApplicationClass</li>
+<li>使用eclipse JDT对源码进行编译，编译后的字节码存到对应的ApplicationClass中</li>
+<li>遍历ApplicationClasses中的所有ApplicationClass，判断其是否需要增强，需要增强的类用插件进行增强并写入文件</li>
+</ol>
+<p>play的编译器使用的是play.classloading.ApplicationCompiler类，这里对编译过程就不做更多的阐述。<br>这里有几点值得提一下</p>
+<ol>
+<li>上面步骤2中扫描java文件只根据java文件名来判断类名，也就是说在步骤2的时候，ApplicationClasses容器中存放的class还只是单纯的外部类，而内部类与匿名内部类还不包括在内，在步骤3使用jdt编译时，ApplicationCompiler类会将匿名类与内部类都加到ApplicationClasses容器中，所以在第4步遍历的时候也会将内部类与匿名类的字节码文件增强然后加到文件中</li>
+<li>由于步骤1会检查是否有插件会编译源码，也就意味着我们可以通过自写插件来覆盖play原有的编译过程。这点我觉得非常不错，因为在使用play做为工程框架时，等到代码量很大时，每次编译过程都会非常漫长，因为play默认会将所有java文件全部重新编译一遍，而这有时候是很不必要的，因为其实只要重新编译更改的文件即可，针对这一点我写了一个根据文件更改时间选择编译的插件，这个放到之后的play应用中再谈。</li>
+</ol>
+<p>下面就是java预编译的主要代码<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//判断是否有插件会进行编译</span></div><div class="line"><span class="keyword">if</span>(!Play.pluginCollection.compileSources()) &#123;</div><div class="line"></div><div class="line">    List&lt;ApplicationClass&gt; all = <span class="keyword">new</span> ArrayList&lt;ApplicationClass&gt;();</div><div class="line">    <span class="comment">//在javaPath中找所有类</span></div><div class="line">    <span class="keyword">for</span> (VirtualFile virtualFile : Play.javaPath) &#123;</div><div class="line">        all.addAll(getAllClasses(virtualFile));</div><div class="line">    &#125;</div><div class="line">    List&lt;String&gt; classNames = <span class="keyword">new</span> ArrayList&lt;String&gt;();</div><div class="line">    <span class="comment">//将所有类名组成list</span></div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; all.size(); i++) &#123;</div><div class="line">            ApplicationClass applicationClass = all.get(i);</div><div class="line">        <span class="keyword">if</span> (applicationClass != <span class="keyword">null</span> &amp;&amp; !applicationClass.compiled &amp;&amp; applicationClass.isClass()) &#123;</div><div class="line">            classNames.add(all.get(i).name);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//调用编译器编译</span></div><div class="line">    Play.classes.compiler.compile(classNames.toArray(<span class="keyword">new</span> String[classNames.size()]));</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">//遍历所有类，添加至allClasses，即ApplicationClasses容器中</span></div><div class="line"><span class="keyword">for</span> (ApplicationClass applicationClass : Play.classes.all()) &#123;</div><div class="line">    <span class="comment">//loadApplicationClass方法关键代码如下</span></div><div class="line">    Class clazz = loadApplicationClass(applicationClass.name);</div><div class="line">    <span class="keyword">if</span> (clazz != <span class="keyword">null</span>) &#123;</div><div class="line">        allClasses.add(clazz);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">long</span> start = System.currentTimeMillis();</div><div class="line"><span class="comment">//从ApplicationClasses容器中找对应的ApplicationClass</span></div><div class="line">ApplicationClass applicationClass = Play.classes.getApplicationClass(name);</div><div class="line"><span class="keyword">if</span> (applicationClass != <span class="keyword">null</span>) &#123;</div><div class="line">    <span class="comment">//isDefinable方法就是判断applicationClass是否已经编译且存在对应的javaClass</span></div><div class="line">    <span class="keyword">if</span> (applicationClass.isDefinable()) &#123;</div><div class="line">        <span class="keyword">return</span> applicationClass.javaClass;</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//查找之前是否存在编译结果</span></div><div class="line">    <span class="keyword">byte</span>[] bc = BytecodeCache.getBytecode(name, applicationClass.javaSource);</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (Logger.isTraceEnabled()) &#123;</div><div class="line">        Logger.trace(<span class="string">"Compiling code for %s"</span>, name);</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//判断applicationClass是一个类还是package-info</span></div><div class="line">    <span class="keyword">if</span> (!applicationClass.isClass()) &#123;</div><div class="line">        definePackage(applicationClass.getPackage(), <span class="keyword">null</span>, <span class="keyword">null</span>, <span class="keyword">null</span>, <span class="keyword">null</span>, <span class="keyword">null</span>, <span class="keyword">null</span>, <span class="keyword">null</span>);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        loadPackage(name);</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//如果之前的编译结果存在，就用之前的</span></div><div class="line">    <span class="keyword">if</span> (bc != <span class="keyword">null</span>) &#123;</div><div class="line">        applicationClass.enhancedByteCode = bc;</div><div class="line">        applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, <span class="number">0</span>, applicationClass.enhancedByteCode.length, protectionDomain);</div><div class="line">        resolveClass(applicationClass.javaClass);</div><div class="line">        <span class="keyword">if</span> (!applicationClass.isClass()) &#123;</div><div class="line">            applicationClass.javaPackage = applicationClass.javaClass.getPackage();</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (Logger.isTraceEnabled()) &#123;</div><div class="line">            Logger.trace(<span class="string">"%sms to load class %s from cache"</span>, System.currentTimeMillis() - start, name);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">return</span> applicationClass.javaClass;</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//如果applicationClass编译过了或者编译后有字节码，进行字节码增强</span></div><div class="line">    <span class="keyword">if</span> (applicationClass.javaByteCode != <span class="keyword">null</span> || applicationClass.compile() != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="comment">//进行字节码增强</span></div><div class="line">        applicationClass.enhance();</div><div class="line">        applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, <span class="number">0</span>, applicationClass.enhancedByteCode.length, protectionDomain);</div><div class="line">        BytecodeCache.cacheBytecode(applicationClass.enhancedByteCode, name, applicationClass.javaSource);</div><div class="line">        resolveClass(applicationClass.javaClass);</div><div class="line">        <span class="keyword">if</span> (!applicationClass.isClass()) &#123;</div><div class="line">            applicationClass.javaPackage = applicationClass.javaClass.getPackage();</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (Logger.isTraceEnabled()) &#123;</div><div class="line">            Logger.trace(<span class="string">"%sms to load class %s"</span>, System.currentTimeMillis() - start, name);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">return</span> applicationClass.javaClass;</div><div class="line">    &#125;</div><div class="line">    Play.classes.classes.remove(name);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="模板预编译"><a href="#模板预编译" class="headerlink" title="模板预编译"></a>模板预编译</h3><p>不同于java的预编译，模板的预编译结果虽然也会存放在precompile文件夹，但是在运行过程中模板并不是一次性全部加载的，模板的加载主要通过play.templates.TemplateLoader来进行，TemplateLoader中存放了使用过的模板信息。<br>在模板预编译过程中，主要是步骤如下：</p>
+<ol>
+<li>扫描Play.templatesPath目录下所有模板文件</li>
+<li>遍历文件，用TemplateLoader.load来加载源文件，并进行模板编译，产生Groovy源码</li>
+<li>对编译后的Groovy源码进行编译，并用base64加密写入文件</li>
+</ol>
+<p>这里只对模板预编译流程做一个梳理，至于编译的过程放在之后的模板篇再说</p>
+<h1 id="play-framework的启动"><a href="#play-framework的启动" class="headerlink" title="play framework的启动"></a>play framework的启动</h1><p>从上一篇server与servletWrapper中我们可以发现，play framework并不是一定在脚本启动之后便启动服务器，在我们使用dev模式进行开发时也会发现，play总是需要接受到一个请求后才会有真正的启动流程。我们这一节就来看看play的启动过程是怎么样的，这个启动与server或servletWrapper的启动的区别在于，play启动后便真正开始业务处理，而server与servletWrapper的启动仅仅是启动了监听端口，当然要清楚的是servletWrapper启动时也会自动启动play<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        <span class="comment">//如果已经启动了，先停止，这里是为了dev模式的热更新</span></div><div class="line">        <span class="keyword">if</span> (started) &#123;</div><div class="line">            stop();</div><div class="line">        &#125;</div><div class="line">        <span class="comment">//如果不是独立的server，即如果不是放在servlet容器中运行，注册关闭事件</span></div><div class="line">        <span class="keyword">if</span>( standalonePlayServer) &#123;</div><div class="line">            <span class="comment">// Can only register shutdown-hook if running as standalone server</span></div><div class="line">            <span class="keyword">if</span> (!shutdownHookEnabled) &#123;</div><div class="line">                <span class="comment">//registers shutdown hook - Now there's a good chance that we can notify</span></div><div class="line">                <span class="comment">//our plugins that we're going down when some calls ctrl+c or just kills our process..</span></div><div class="line">                shutdownHookEnabled = <span class="keyword">true</span>;</div><div class="line">                Runtime.getRuntime().addShutdownHook(<span class="keyword">new</span> Thread() &#123;</div><div class="line">                    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">                        Play.stop();</div><div class="line">                    &#125;</div><div class="line">                &#125;);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="comment">//如果是dev模式启动，重新加载所有class和插件</span></div><div class="line">        <span class="keyword">if</span> (mode == Mode.DEV) &#123;</div><div class="line">            <span class="comment">// Need a new classloader</span></div><div class="line">            classloader = <span class="keyword">new</span> ApplicationClassloader();</div><div class="line">            <span class="comment">// Put it in the current context for any code that relies on having it there</span></div><div class="line">            Thread.currentThread().setContextClassLoader(classloader);</div><div class="line">            <span class="comment">// Reload plugins</span></div><div class="line">            pluginCollection.reloadApplicationPlugins();</div><div class="line"></div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="comment">// 读取配置文件</span></div><div class="line">        readConfiguration();</div><div class="line"></div><div class="line">        <span class="comment">// 配置日志</span></div><div class="line">        String logLevel = configuration.getProperty(<span class="string">"application.log"</span>, <span class="string">"INFO"</span>);</div><div class="line">        <span class="comment">//only override log-level if Logger was not configured manually</span></div><div class="line">        <span class="keyword">if</span>( !Logger.configuredManually) &#123;</div><div class="line">            Logger.setUp(logLevel);</div><div class="line">        &#125;</div><div class="line">        Logger.recordCaller = Boolean.parseBoolean(configuration.getProperty(<span class="string">"application.log.recordCaller"</span>, <span class="string">"false"</span>));</div><div class="line"></div><div class="line">        <span class="comment">// 设置语言</span></div><div class="line">        langs = <span class="keyword">new</span> ArrayList&lt;String&gt;(Arrays.asList(configuration.getProperty(<span class="string">"application.langs"</span>, <span class="string">""</span>).split(<span class="string">","</span>)));</div><div class="line">        <span class="keyword">if</span> (langs.size() == <span class="number">1</span> &amp;&amp; langs.get(<span class="number">0</span>).trim().length() == <span class="number">0</span>) &#123;</div><div class="line">            langs = <span class="keyword">new</span> ArrayList&lt;String&gt;(<span class="number">16</span>);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="comment">// 重新加载模板</span></div><div class="line">        TemplateLoader.cleanCompiledCache();</div><div class="line"></div><div class="line">        <span class="comment">// 设置secretKey</span></div><div class="line">        secretKey = configuration.getProperty(<span class="string">"application.secret"</span>, <span class="string">""</span>).trim();</div><div class="line">        <span class="keyword">if</span> (secretKey.length() == <span class="number">0</span>) &#123;</div><div class="line">            Logger.warn(<span class="string">"No secret key defined. Sessions will not be encrypted"</span>);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="comment">// 设置默认web encoding</span></div><div class="line">        String _defaultWebEncoding = configuration.getProperty(<span class="string">"application.web_encoding"</span>);</div><div class="line">        <span class="keyword">if</span>( _defaultWebEncoding != <span class="keyword">null</span> ) &#123;</div><div class="line">            Logger.info(<span class="string">"Using custom default web encoding: "</span> + _defaultWebEncoding);</div><div class="line">            defaultWebEncoding = _defaultWebEncoding;</div><div class="line">            <span class="comment">// Must update current response also, since the request/response triggering</span></div><div class="line">            <span class="comment">// this configuration-loading in dev-mode have already been</span></div><div class="line">            <span class="comment">// set up with the previous encoding</span></div><div class="line">            <span class="keyword">if</span>( Http.Response.current() != <span class="keyword">null</span> ) &#123;</div><div class="line">                Http.Response.current().encoding = _defaultWebEncoding;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="comment">// 加载所有class</span></div><div class="line">        Play.classloader.getAllClasses();</div><div class="line"></div><div class="line">        <span class="comment">// 加载路由</span></div><div class="line">        Router.detectChanges(ctxPath);</div><div class="line"></div><div class="line">        <span class="comment">// 初始化缓存</span></div><div class="line">        Cache.init();</div><div class="line"></div><div class="line">        <span class="comment">// 运行插件onApplicationStart方法</span></div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            pluginCollection.onApplicationStart();</div><div class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">            <span class="keyword">if</span> (Play.mode.isProd()) &#123;</div><div class="line">                Logger.error(e, <span class="string">"Can't start in PROD mode with errors"</span>);</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">if</span> (e <span class="keyword">instanceof</span> RuntimeException) &#123;</div><div class="line">                <span class="keyword">throw</span> (RuntimeException) e;</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> UnexpectedException(e);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (firstStart) &#123;</div><div class="line">            Logger.info(<span class="string">"Application '%s' is now started !"</span>, configuration.getProperty(<span class="string">"application.name"</span>, <span class="string">""</span>));</div><div class="line">            firstStart = <span class="keyword">false</span>;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="comment">// We made it</span></div><div class="line">        started = <span class="keyword">true</span>;</div><div class="line">        startedAt = System.currentTimeMillis();</div><div class="line"></div><div class="line">        <span class="comment">// 运行插件afterApplicationStart方法</span></div><div class="line">        pluginCollection.afterApplicationStart();</div><div class="line"></div><div class="line">    &#125; <span class="keyword">catch</span> (PlayException e) &#123;</div><div class="line">        started = <span class="keyword">false</span>;</div><div class="line">        <span class="keyword">try</span> &#123; Cache.stop(); &#125; <span class="keyword">catch</span> (Exception ignored) &#123;&#125;</div><div class="line">        <span class="keyword">throw</span> e;</div><div class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">        started = <span class="keyword">false</span>;</div><div class="line">        <span class="keyword">try</span> &#123; Cache.stop(); &#125; <span class="keyword">catch</span> (Exception ignored) &#123;&#125;</div><div class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> UnexpectedException(e);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>可以看出play的启动和play的初始化有很多相同的地方，包括加载配置，加载日志等，启动过程有很多有意思的地方</p>
+<ol>
+<li>play的启动不会重置模块列表，也就是说如果在dev模式下对配置文件进行修改增加了模块必须要重启服务器，热更新是无效的。</li>
+<li>在play的初始化过程中，如果是使用容器打开服务器时就会加载预编译文件，这时候已经读取一遍预编译源码了，所有在启动过程中的getAllClasses就不会再去查找了</li>
+<li>插件的onApplicationStart方法一般就是执行些插件初始化的工作，所以遇到错误就会中断启动过程，而afterApplicationStart是在启动完成后在运行的，很有意思的是，用@OnApplicationStart标识的job类是在afterApplicationStart阶段运行的，而不是onApplicationStart阶段。<del>那为什么要叫这个名字</del></li>
+</ol>
+<p>可以看出路由的解析是在play的启动过程中进行的，具体过程就是读取路径下的路由文件，然后路由的具体解析过程放在模板篇一起讲吧</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>Play类的初始化与启动已经说的差不多了，下一篇我们来看下ActionInvoker与mvc</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/program/" rel="tag"># program</a>
+          
+            <a href="/tags/源码解析/" rel="tag"># 源码解析</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/Play-framework源码解析-Part2-Server与ServletWrapper.html" rel="next" title="Play framework源码解析 Part2:Server与ServletWrapper">
+                <i class="fa fa-chevron-left"></i> Play framework源码解析 Part2:Server与ServletWrapper
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/Play-framework源码解析-Part4-ActionInvoker与mvc.html" rel="prev" title="Play framework源码解析 Part4:ActionInvoker与mvc">
+                Play framework源码解析 Part4:ActionInvoker与mvc <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMTYyNy84MTkx"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">苗苗</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/asukaonly" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://weibo.com/u/3986621816" target="_blank" title="微博">
+                    
+                      <i class="fa fa-fw fa-weibo"></i>微博</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Play类"><span class="nav-number">1.</span> <span class="nav-text">Play类</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Play的初始化"><span class="nav-number">2.</span> <span class="nav-text">Play的初始化</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#加载play-static"><span class="nav-number">2.1.</span> <span class="nav-text">加载play.static</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#获取框架路径"><span class="nav-number">2.2.</span> <span class="nav-text">获取框架路径</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#读取配置文件"><span class="nav-number">2.3.</span> <span class="nav-text">读取配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#初始化日志"><span class="nav-number">2.4.</span> <span class="nav-text">初始化日志</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查找文件路径"><span class="nav-number">2.5.</span> <span class="nav-text">查找文件路径</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#加载模块"><span class="nav-number">2.6.</span> <span class="nav-text">加载模块</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#加载插件"><span class="nav-number">2.7.</span> <span class="nav-text">加载插件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#预编译"><span class="nav-number">2.8.</span> <span class="nav-text">预编译</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#java预编译"><span class="nav-number">2.8.1.</span> <span class="nav-text">java预编译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#模板预编译"><span class="nav-number">2.8.2.</span> <span class="nav-text">模板预编译</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#play-framework的启动"><span class="nav-number">3.</span> <span class="nav-text">play framework的启动</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-star"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">苗苗</span>
+
+  
+  <span class="post-meta-divider">|</span>
+<span>Hosted by <a href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a></span>
+</div>
+
+
+
+  <div class="powered-by">由 <a class="theme-link" rel="external nofollow" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" rel="external nofollow" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="//libs.baidu.com/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("hCFRloPXiR1VJQP6yPs2g5hL-gzGzoHsz", "bHgMH9e2qbwwTrnGPNw8CLwt");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

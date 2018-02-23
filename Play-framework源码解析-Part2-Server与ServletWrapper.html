@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="program,源码解析," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="在上一节中我们剖析了Play framework的启动原理，很容易就能发现Play framework的启动主入口在play.server.Server中，在本节，我们来一起看看Server类中主要发生了什么。 Server类既然是程序运行的主入口，那么必然是由main方法进入的，Server类中的main方法十分简单。源码如下:">
+<meta name="keywords" content="program,源码解析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Play framework源码解析 Part2:Server与ServletWrapper">
+<meta property="og:url" content="http://luyanliang.top/Play-framework源码解析-Part2-Server与ServletWrapper.html">
+<meta property="og:site_name" content="404 not found">
+<meta property="og:description" content="在上一节中我们剖析了Play framework的启动原理，很容易就能发现Play framework的启动主入口在play.server.Server中，在本节，我们来一起看看Server类中主要发生了什么。 Server类既然是程序运行的主入口，那么必然是由main方法进入的，Server类中的main方法十分简单。源码如下:">
+<meta property="og:image" content="https://s1.ax1x.com/2018/01/16/pdfssg.jpg">
+<meta property="og:updated_time" content="2018-01-28T14:02:39.117Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Play framework源码解析 Part2:Server与ServletWrapper">
+<meta name="twitter:description" content="在上一节中我们剖析了Play framework的启动原理，很容易就能发现Play framework的启动主入口在play.server.Server中，在本节，我们来一起看看Server类中主要发生了什么。 Server类既然是程序运行的主入口，那么必然是由main方法进入的，Server类中的main方法十分简单。源码如下:">
+<meta name="twitter:image" content="https://s1.ax1x.com/2018/01/16/pdfssg.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://luyanliang.top/Play-framework源码解析-Part2-Server与ServletWrapper.html"/>
+
+
+
+
+
+  <title>Play framework源码解析 Part2:Server与ServletWrapper | 404 not found</title>
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-109062760-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">404 not found</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'jPjTak7tUxEbrqgszu_j','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://luyanliang.top/Play-framework源码解析-Part2-Server与ServletWrapper.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="苗苗">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="404 not found">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Play framework源码解析 Part2:Server与ServletWrapper</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-11T15:16:54+08:00">
+                2018-01-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/program/" itemprop="url" rel="index">
+                    <span itemprop="name">program</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/program/java/" itemprop="url" rel="index">
+                    <span itemprop="name">java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/Play-framework源码解析-Part2-Server与ServletWrapper.html" class="leancloud_visitors" data-flag-title="Play framework源码解析 Part2:Server与ServletWrapper">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在上一节中我们剖析了Play framework的启动原理，很容易就能发现Play framework的启动主入口在play.server.Server中，在本节，我们来一起看看Server类中主要发生了什么。</p>
+<h1 id="Server类"><a href="#Server类" class="headerlink" title="Server类"></a>Server类</h1><p>既然是程序运行的主入口，那么必然是由main方法进入的，Server类中的main方法十分简单。源码如下:</p>
+<a id="more"></a>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line">    File root = <span class="keyword">new</span> File(System.getProperty(<span class="string">"application.path"</span>));</div><div class="line">    <span class="comment">//获取参数中的precompiled</span></div><div class="line">    <span class="keyword">if</span> (System.getProperty(<span class="string">"precompiled"</span>, <span class="string">"false"</span>).equals(<span class="string">"true"</span>)) &#123;</div><div class="line">        Play.usePrecompiled = <span class="keyword">true</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//获取参数中的writepid</span></div><div class="line">    <span class="keyword">if</span> (System.getProperty(<span class="string">"writepid"</span>, <span class="string">"false"</span>).equals(<span class="string">"true"</span>)) &#123;</div><div class="line">        <span class="comment">//这个方法的作用是检查当前目录下是否存在server.pid文件，若存在表明当前已有程序在运行</span></div><div class="line">        writePID(root);</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//Play类的初始化</span></div><div class="line">    Play.init(root, System.getProperty(<span class="string">"play.id"</span>, <span class="string">""</span>));</div><div class="line">    <span class="keyword">if</span> (System.getProperty(<span class="string">"precompile"</span>) == <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="comment">//Server类初始化</span></div><div class="line">        <span class="keyword">new</span> Server(args);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        Logger.info(<span class="string">"Done."</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>main方法执行的操作很简单:</p>
+<ol>
+<li>获取程序路径</li>
+<li>检查是否存在precompiled参数</li>
+<li>检查是否存在writepid参数，若存在则检查是否存在server.pid文件，若存在则表明已有程序在运行，不存在则将当前程序pid写入server.pid</li>
+<li>play类初始化</li>
+<li>检查是否存在precompile参数项，若存在表示是个预编译行为，结束运行，若没有则启动服务</li>
+</ol>
+<p>这其中最重要的便是Play类的初始化以及Server类的初始化<br>这里我们先来看Server类的初始化过程，现在可以先简单的将Play类的初始化理解为Play框架中一些常量的初始化以及日志、配置文件、路由信息等配置的读取。<br>这里贴一下Server类的初始化过程：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">Server</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">    <span class="comment">//设置文件编码为UTF-8</span></div><div class="line">    System.setProperty(<span class="string">"file.encoding"</span>, <span class="string">"utf-8"</span>);</div><div class="line">    <span class="comment">//p为Play类初始化过程中读取的配置文件信息</span></div><div class="line">    <span class="keyword">final</span> Properties p = Play.configuration;</div><div class="line">    <span class="comment">//获取参数中的http与https端口信息，若不存在则用配置文件中的http与https端口信息</span></div><div class="line">    httpPort = Integer.parseInt(getOpt(args, <span class="string">"http.port"</span>, p.getProperty(<span class="string">"http.port"</span>, <span class="string">"-1"</span>)));</div><div class="line">    httpsPort = Integer.parseInt(getOpt(args, <span class="string">"https.port"</span>, p.getProperty(<span class="string">"https.port"</span>, <span class="string">"-1"</span>)));</div><div class="line">    <span class="comment">//若没有配置则设置默认端口为9000</span></div><div class="line">    <span class="keyword">if</span> (httpPort == -<span class="number">1</span> &amp;&amp; httpsPort == -<span class="number">1</span>) &#123;</div><div class="line">        httpPort = <span class="number">9000</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//http与https端口不能相同</span></div><div class="line">    <span class="keyword">if</span> (httpPort == httpsPort) &#123;</div><div class="line">        Logger.error(<span class="string">"Could not bind on https and http on the same port "</span> + httpPort);</div><div class="line">        Play.fatalServerErrorOccurred();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    InetAddress address = <span class="keyword">null</span>;</div><div class="line">    InetAddress secureAddress = <span class="keyword">null</span>;</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        <span class="comment">//获取配置文件中的默认http地址，若不存在则在系统参数中查找</span></div><div class="line">        <span class="comment">//之前还是参数配置大于配置文件，这里不知道为什么又变成了配置文件的优先级高于参数配置，很迷</span></div><div class="line">        <span class="keyword">if</span> (p.getProperty(<span class="string">"http.address"</span>) != <span class="keyword">null</span>) &#123;</div><div class="line">            address = InetAddress.getByName(p.getProperty(<span class="string">"http.address"</span>));</div><div class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (System.getProperties().containsKey(<span class="string">"http.address"</span>)) &#123;</div><div class="line">            address = InetAddress.getByName(System.getProperty(<span class="string">"http.address"</span>));</div><div class="line">        &#125;</div><div class="line"></div><div class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">        Logger.error(e, <span class="string">"Could not understand http.address"</span>);</div><div class="line">        Play.fatalServerErrorOccurred();</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        <span class="comment">//同上，获取https地址</span></div><div class="line">        <span class="keyword">if</span> (p.getProperty(<span class="string">"https.address"</span>) != <span class="keyword">null</span>) &#123;</div><div class="line">            secureAddress = InetAddress.getByName(p.getProperty(<span class="string">"https.address"</span>));</div><div class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (System.getProperties().containsKey(<span class="string">"https.address"</span>)) &#123;</div><div class="line">            secureAddress = InetAddress.getByName(System.getProperty(<span class="string">"https.address"</span>));</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">        Logger.error(e, <span class="string">"Could not understand https.address"</span>);</div><div class="line">        Play.fatalServerErrorOccurred();</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//netty服务器启动类初始化，使用nio服务器，无限制线程池</span></div><div class="line">    <span class="comment">//这里的线程池是netty的主线程池与工作线程池，是处理连接的线程池，而Play实际执行业务操作的线程池在另一个地方配置</span></div><div class="line">    ServerBootstrap bootstrap = <span class="keyword">new</span> ServerBootstrap(<span class="keyword">new</span> NioServerSocketChannelFactory(</div><div class="line">            Executors.newCachedThreadPool(), Executors.newCachedThreadPool())</div><div class="line">    );</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        <span class="comment">//初始化http端口</span></div><div class="line">        <span class="keyword">if</span> (httpPort != -<span class="number">1</span>) &#123;</div><div class="line">            <span class="comment">//设置管道工厂类</span></div><div class="line">            bootstrap.setPipelineFactory(<span class="keyword">new</span> HttpServerPipelineFactory());</div><div class="line">            <span class="comment">//绑定端口</span></div><div class="line">            bootstrap.bind(<span class="keyword">new</span> InetSocketAddress(address, httpPort));</div><div class="line">            bootstrap.setOption(<span class="string">"child.tcpNoDelay"</span>, <span class="keyword">true</span>);</div><div class="line"></div><div class="line">            <span class="keyword">if</span> (Play.mode == Mode.DEV) &#123;</div><div class="line">                <span class="keyword">if</span> (address == <span class="keyword">null</span>) &#123;</div><div class="line">                    Logger.info(<span class="string">"Listening for HTTP on port %s (Waiting a first request to start) ..."</span>, httpPort);</div><div class="line">                &#125; <span class="keyword">else</span> &#123;</div><div class="line">                    Logger.info(<span class="string">"Listening for HTTP at %2$s:%1$s (Waiting a first request to start) ..."</span>, httpPort, address);</div><div class="line">                &#125;</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                <span class="keyword">if</span> (address == <span class="keyword">null</span>) &#123;</div><div class="line">                    Logger.info(<span class="string">"Listening for HTTP on port %s ..."</span>, httpPort);</div><div class="line">                &#125; <span class="keyword">else</span> &#123;</div><div class="line">                    Logger.info(<span class="string">"Listening for HTTP at %2$s:%1$s  ..."</span>, httpPort, address);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">        &#125;</div><div class="line"></div><div class="line">    &#125; <span class="keyword">catch</span> (ChannelException e) &#123;</div><div class="line">        Logger.error(<span class="string">"Could not bind on port "</span> + httpPort, e);</div><div class="line">        Play.fatalServerErrorOccurred();</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//下面是https端口服务器的启动过程，和http一致</span></div><div class="line">    bootstrap = <span class="keyword">new</span> ServerBootstrap(<span class="keyword">new</span> NioServerSocketChannelFactory(</div><div class="line">            Executors.newCachedThreadPool(), Executors.newCachedThreadPool())</div><div class="line">    );</div><div class="line"></div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        <span class="keyword">if</span> (httpsPort != -<span class="number">1</span>) &#123;</div><div class="line">            <span class="comment">//这里的管道工厂类变成了SslHttpServerPipelineFactory</span></div><div class="line">            bootstrap.setPipelineFactory(<span class="keyword">new</span> SslHttpServerPipelineFactory());</div><div class="line">            bootstrap.bind(<span class="keyword">new</span> InetSocketAddress(secureAddress, httpsPort));</div><div class="line">            bootstrap.setOption(<span class="string">"child.tcpNoDelay"</span>, <span class="keyword">true</span>);</div><div class="line"></div><div class="line">            <span class="keyword">if</span> (Play.mode == Mode.DEV) &#123;</div><div class="line">                <span class="keyword">if</span> (secureAddress == <span class="keyword">null</span>) &#123;</div><div class="line">                    Logger.info(<span class="string">"Listening for HTTPS on port %s (Waiting a first request to start) ..."</span>, httpsPort);</div><div class="line">                &#125; <span class="keyword">else</span> &#123;</div><div class="line">                    Logger.info(<span class="string">"Listening for HTTPS at %2$s:%1$s (Waiting a first request to start) ..."</span>, httpsPort, secureAddress);</div><div class="line">                &#125;</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                <span class="keyword">if</span> (secureAddress == <span class="keyword">null</span>) &#123;</div><div class="line">                    Logger.info(<span class="string">"Listening for HTTPS on port %s ..."</span>, httpsPort);</div><div class="line">                &#125; <span class="keyword">else</span> &#123;</div><div class="line">                    Logger.info(<span class="string">"Listening for HTTPS at %2$s:%1$s  ..."</span>, httpsPort, secureAddress);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">        &#125;</div><div class="line"></div><div class="line">    &#125; <span class="keyword">catch</span> (ChannelException e) &#123;</div><div class="line">        Logger.error(<span class="string">"Could not bind on port "</span> + httpsPort, e);</div><div class="line">        Play.fatalServerErrorOccurred();</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> (Play.mode == Mode.DEV) &#123;</div><div class="line">       <span class="comment">// print this line to STDOUT - not using logger, so auto test runner will not block if logger is misconfigured (see #1222)</span></div><div class="line">       <span class="comment">//输出启动成功，以便进行自动化测试</span></div><div class="line">       System.out.println(<span class="string">"~ Server is up and running"</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>server类的初始化没什么好说的，重点就在于那2个管道工厂类，HttpServerPipelineFactory与SslHttpServerPipelineFactory</p>
+<h2 id="HttpServerPipelineFactory"><a href="#HttpServerPipelineFactory" class="headerlink" title="HttpServerPipelineFactory"></a>HttpServerPipelineFactory</h2><p>HttpServerPipelineFactory类作用就是为netty服务器增加了各个ChannelHandler。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HttpServerPipelineFactory</span> <span class="keyword">implements</span> <span class="title">ChannelPipelineFactory</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> ChannelPipeline <span class="title">getPipeline</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line"></div><div class="line">        Integer max = Integer.valueOf(Play.configuration.getProperty(<span class="string">"play.netty.maxContentLength"</span>, <span class="string">"-1"</span>));</div><div class="line"></div><div class="line">        ChannelPipeline pipeline = pipeline();</div><div class="line">        PlayHandler playHandler = <span class="keyword">new</span> PlayHandler();</div><div class="line"></div><div class="line">        pipeline.addLast(<span class="string">"flashPolicy"</span>, <span class="keyword">new</span> FlashPolicyHandler()); </div><div class="line">        pipeline.addLast(<span class="string">"decoder"</span>, <span class="keyword">new</span> HttpRequestDecoder());</div><div class="line">        pipeline.addLast(<span class="string">"aggregator"</span>, <span class="keyword">new</span> StreamChunkAggregator(max));</div><div class="line">        pipeline.addLast(<span class="string">"encoder"</span>, <span class="keyword">new</span> HttpResponseEncoder());</div><div class="line">        pipeline.addLast(<span class="string">"chunkedWriter"</span>, playHandler.chunkedWriteHandler);</div><div class="line">        pipeline.addLast(<span class="string">"handler"</span>, playHandler);</div><div class="line"></div><div class="line">        <span class="keyword">return</span> pipeline;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>pipeline依次添加了flash处理器，http request解码器，流区块聚合器，http response编码器，区块写入器，play处理器<br>flash处理器和流区块聚合器这里暂且不作详细解析，读者可以理解为这2者的作用分别为传输flash流和合并请求头中有Transfer-Encoding:chunked的请求数据。<br>PlayHandler类是Play将netty接收到的request转换为play的request并真正开始业务处理的入口类，我们先暂时放下PlayHandler，先来看看SslHttpServerPipelineFactory做了什么</p>
+<h2 id="SslHttpServerPipelineFactory"><a href="#SslHttpServerPipelineFactory" class="headerlink" title="SslHttpServerPipelineFactory"></a>SslHttpServerPipelineFactory</h2><p>SslHttpServerPipelineFactory是https使用的管道工厂类，他除了添加了一下处理器外，最重要的是根据配置创建了https的连接方式。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> ChannelPipeline <span class="title">getPipeline</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line"></div><div class="line">    Integer max = Integer.valueOf(Play.configuration.getProperty(<span class="string">"play.netty.maxContentLength"</span>, <span class="string">"-1"</span>));</div><div class="line">    String mode = Play.configuration.getProperty(<span class="string">"play.netty.clientAuth"</span>, <span class="string">"none"</span>);</div><div class="line"></div><div class="line">    ChannelPipeline pipeline = pipeline();</div><div class="line"></div><div class="line">    <span class="comment">// Add SSL handler first to encrypt and decrypt everything.</span></div><div class="line">    SSLEngine engine = SslHttpServerContextFactory.getServerContext().createSSLEngine();</div><div class="line">    engine.setUseClientMode(<span class="keyword">false</span>);</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (<span class="string">"want"</span>.equalsIgnoreCase(mode)) &#123;</div><div class="line">        engine.setWantClientAuth(<span class="keyword">true</span>);</div><div class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">"need"</span>.equalsIgnoreCase(mode)) &#123;</div><div class="line">        engine.setNeedClientAuth(<span class="keyword">true</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    engine.setEnableSessionCreation(<span class="keyword">true</span>);</div><div class="line"></div><div class="line">    pipeline.addLast(<span class="string">"flashPolicy"</span>, <span class="keyword">new</span> FlashPolicyHandler());</div><div class="line">    pipeline.addLast(<span class="string">"ssl"</span>, <span class="keyword">new</span> SslHandler(engine));</div><div class="line">    pipeline.addLast(<span class="string">"decoder"</span>, <span class="keyword">new</span> HttpRequestDecoder());</div><div class="line">    pipeline.addLast(<span class="string">"aggregator"</span>, <span class="keyword">new</span> StreamChunkAggregator(max));</div><div class="line">    pipeline.addLast(<span class="string">"encoder"</span>, <span class="keyword">new</span> HttpResponseEncoder());</div><div class="line">    pipeline.addLast(<span class="string">"chunkedWriter"</span>, <span class="keyword">new</span> ChunkedWriteHandler());</div><div class="line"></div><div class="line">    pipeline.addLast(<span class="string">"handler"</span>, <span class="keyword">new</span> SslPlayHandler());</div><div class="line"></div><div class="line">    <span class="keyword">return</span> pipeline;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>在设置完SSLEngine后，SslHttpServerPipelineFactory在decoder处理器前加了一个SslHandler来处理连接，这里不是使用playHandler作为处理器，而是使用SslPlayHandler，SslPlayHandler是PlayHandler的一个子类，就是重写了连接和出错时的处理，这里不多做阐述。</p>
+<h2 id="PlayHandler"><a href="#PlayHandler" class="headerlink" title="PlayHandler"></a>PlayHandler</h2><p>PlayHandler的作用是解析http request的类型，然后根据不同类型来进行不同的处理，由于PlayHandler内处理的东西较多，这里先附上一张大体流程图以供读者参考<br><img src="https://s1.ax1x.com/2018/01/16/pdfssg.jpg" alt="PlayHandle流程图"></p>
+<h3 id="messageReceived"><a href="#messageReceived" class="headerlink" title="messageReceived"></a>messageReceived</h3><p>messageReceived是一个Override方法，作用就是在netty消息传递至该handle时进行相应操作,方法代码如下<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">messageReceived</span><span class="params">(<span class="keyword">final</span> ChannelHandlerContext ctx, <span class="keyword">final</span> MessageEvent messageEvent)</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line">    <span class="keyword">if</span> (Logger.isTraceEnabled()) &#123;</div><div class="line">        Logger.trace(<span class="string">"messageReceived: begin"</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">final</span> Object msg = messageEvent.getMessage();</div><div class="line"></div><div class="line">    <span class="comment">//判断是否为HttpRequest的信息，不是则不进行处理</span></div><div class="line">    <span class="keyword">if</span> (msg <span class="keyword">instanceof</span> HttpRequest) &#123;</div><div class="line"></div><div class="line">        <span class="keyword">final</span> HttpRequest nettyRequest = (HttpRequest) msg;</div><div class="line"></div><div class="line">        <span class="comment">// 若为websocket的初次握手请求，则进行websocket握手过程</span></div><div class="line">        <span class="keyword">if</span> (HttpHeaders.Values.WEBSOCKET.equalsIgnoreCase(nettyRequest.getHeader(HttpHeaders.Names.UPGRADE))) &#123;</div><div class="line">            websocketHandshake(ctx, nettyRequest, messageEvent);</div><div class="line">            <span class="keyword">return</span>;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            <span class="comment">//将netty的request转为Play的request</span></div><div class="line">            <span class="keyword">final</span> Request request = parseRequest(ctx, nettyRequest, messageEvent);</div><div class="line"></div><div class="line">            <span class="keyword">final</span> Response response = <span class="keyword">new</span> Response();</div><div class="line">            <span class="comment">//Response.current为ThreadLocal&lt;Response&gt;类型，保证每个线程拥有单独Response</span></div><div class="line">            Http.Response.current.set(response);</div><div class="line"></div><div class="line">            <span class="comment">// Buffered in memory output</span></div><div class="line">            response.out = <span class="keyword">new</span> ByteArrayOutputStream();</div><div class="line"></div><div class="line">            <span class="comment">// Direct output (will be set later)</span></div><div class="line">            response.direct = <span class="keyword">null</span>;</div><div class="line"></div><div class="line">            <span class="comment">// Streamed output (using response.writeChunk)</span></div><div class="line">            response.onWriteChunk(<span class="keyword">new</span> Action&lt;Object&gt;() &#123;</div><div class="line"></div><div class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">invoke</span><span class="params">(Object result)</span> </span>&#123;</div><div class="line">                    writeChunk(request, response, ctx, nettyRequest, result);</div><div class="line">                &#125;</div><div class="line">            &#125;);</div><div class="line"></div><div class="line">            <span class="comment">/*</span></div><div class="line">                查找Play插件(即继承了PlayPlugin抽象类的类)中是否有该request的实现方法，若存在，则用Play插件的实现</div><div class="line">                Play自带的插件实现有：</div><div class="line">                    CorePlugin实现了/@kill和/@status路径的访问流程</div><div class="line">                    DBPlugin实现了/@db路径的访问流程</div><div class="line">                    Evolutions实现了/@evolutions路径的访问流程</div><div class="line">                这里将插件的访问与其他访问分开最主要原因应该是插件访问不需要启动Play，而其他命令必须先调用Play.start来启动</div><div class="line">            */</div><div class="line">            <span class="keyword">boolean</span> raw = Play.pluginCollection.rawInvocation(request, response);</div><div class="line">            <span class="keyword">if</span> (raw) &#123;</div><div class="line">                copyResponse(ctx, request, response, nettyRequest);</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                <span class="comment">/*</span></div><div class="line">                    Invoker.invoke就是向Invoker类中的ScheduledThreadPoolExecutor提交任务并执行</div><div class="line">                    使用ScheduledThreadPoolExecutor是因为可以定时，便于执行异步任务</div><div class="line">                    Invoker类可以理解为是各个不同容器任务转向Play任务的一个转换类，他下面有2个静态内部类，分别为InvocationContext和Invocation</div><div class="line">                    InvocationContext内存放了当前request映射的controller类的annotation</div><div class="line">                    Invocation则为Play任务的基类，他的实现类有：</div><div class="line">                        Job：Play的异步任务</div><div class="line">                        NettyInvocation：netty请求的实现类</div><div class="line">                        ServletInvocation：Servlet容器中的实现类</div><div class="line">                        WebSocketInvocation：websocket的实现类</div><div class="line">                */</div><div class="line">                Invoker.invoke(<span class="keyword">new</span> NettyInvocation(request, response, ctx, nettyRequest, messageEvent));</div><div class="line">            &#125;</div><div class="line"></div><div class="line">        &#125; <span class="keyword">catch</span> (Exception ex) &#123;</div><div class="line">            <span class="comment">//处理服务器错误</span></div><div class="line">            serve500(ex, ctx, nettyRequest);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// 如果msg是websocket，则进行websocket接收</span></div><div class="line">    <span class="keyword">if</span> (msg <span class="keyword">instanceof</span> WebSocketFrame) &#123;</div><div class="line">        WebSocketFrame frame = (WebSocketFrame) msg;</div><div class="line">        websocketFrameReceived(ctx, frame);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (Logger.isTraceEnabled()) &#123;</div><div class="line">        Logger.trace(<span class="string">"messageReceived: end"</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>可以很清楚的发现PlayHandler处理请求就是依靠了各个不同的Invocation实现来完成，那我们就来看看Invocation他是如何一步步处理请求的。</p>
+<h3 id="Invocation"><a href="#Invocation" class="headerlink" title="Invocation"></a>Invocation</h3><p>Invocation是一个抽象类，继承了Runnable接口，它的run方法是这个类的核心。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="comment">//waitInQueue是一个监视器，监视了这个invocation在队列中等待的时间</span></div><div class="line">    <span class="keyword">if</span> (waitInQueue != <span class="keyword">null</span>) &#123;</div><div class="line">        waitInQueue.stop();</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        <span class="comment">//预初始化，是对语言文件的清空</span></div><div class="line">        preInit();</div><div class="line">        <span class="comment">//初始化</span></div><div class="line">        <span class="keyword">if</span> (init()) &#123;</div><div class="line">            <span class="comment">//运行执行前插件任务</span></div><div class="line">            before();</div><div class="line">            <span class="comment">//处理request</span></div><div class="line">            execute();</div><div class="line">            <span class="comment">//运行执行后插件任务</span></div><div class="line">            after();</div><div class="line">            <span class="comment">//成功执行后的处理</span></div><div class="line">            onSuccess();</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">catch</span> (Suspend e) &#123;</div><div class="line">        <span class="comment">//Suspend类让请求暂停</span></div><div class="line">        suspend(e);</div><div class="line">        after();</div><div class="line">    &#125; <span class="keyword">catch</span> (Throwable e) &#123;</div><div class="line">        onException(e);</div><div class="line">    &#125; <span class="keyword">finally</span> &#123;</div><div class="line">        _finally();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这里面的preInit()、before()、after()是没有实现类的，用的就是Invocation类中的方法。我们先来看看Invocation类中对这些方法的实现，然后再来看看他的实现类对这些方法的修改</p>
+<ul>
+<li>init</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="comment">//设置当前线程的classloader</span></div><div class="line">    Thread.currentThread().setContextClassLoader(Play.classloader);</div><div class="line">    <span class="comment">//检查是否为dev模式，是则检查文件是否修改，以进行热加载</span></div><div class="line">    Play.detectChanges();</div><div class="line">    <span class="comment">//若Play未启动，启动</span></div><div class="line">    <span class="keyword">if</span> (!Play.started) &#123;</div><div class="line">        <span class="keyword">if</span> (Play.mode == Mode.PROD) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> UnexpectedException(<span class="string">"Application is not started"</span>);</div><div class="line">        &#125;</div><div class="line">        Play.start();</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//InvocationContext中添加当前映射方法的annotation</span></div><div class="line">    InvocationContext.current.set(getInvocationContext());</div><div class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><em>Play.start可以先理解为启动Play服务，具体展开将在之后mvc章节详解</em></p>
+<ul>
+<li>execute</li>
+</ul>
+<p>execute在Invocation类中是一个抽象方法，需要实现类完成自己的实现</p>
+<ul>
+<li>onSuccess</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onSuccess</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line">    Play.pluginCollection.onInvocationSuccess();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>执行play插件中的执行成功方法</p>
+<ul>
+<li>onException</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onException</span><span class="params">(Throwable e)</span> </span>&#123;</div><div class="line">    Play.pluginCollection.onInvocationException(e);</div><div class="line">    <span class="keyword">if</span> (e <span class="keyword">instanceof</span> PlayException) &#123;</div><div class="line">        <span class="keyword">throw</span> (PlayException) e;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> UnexpectedException(e);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>执行play插件中的执行异常方法，然后抛出异常</p>
+<ul>
+<li>suspend</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">suspend</span><span class="params">(Suspend suspendRequest)</span> </span>&#123;</div><div class="line">    <span class="keyword">if</span> (suspendRequest.task != <span class="keyword">null</span>) &#123;</div><div class="line">        WaitForTasksCompletion.waitFor(suspendRequest.task, <span class="keyword">this</span>);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        Invoker.invoke(<span class="keyword">this</span>, suspendRequest.timeout);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>若暂停的请求有任务，那么调用WaitForTasksCompletion.waitFor进行等待，直到任务完成再继续运行请求<br>若没有任务，那就将请求通过ScheduledThreadPoolExecutor.schedule延时一段时间后执行</p>
+<ul>
+<li>_finally</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">_finally</span><span class="params">()</span> </span>&#123;</div><div class="line">    Play.pluginCollection.invocationFinally();</div><div class="line">    InvocationContext.current.remove();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>执行play插件中的invocationFinally方法</p>
+<h4 id="NettyInvocation"><a href="#NettyInvocation" class="headerlink" title="NettyInvocation"></a>NettyInvocation</h4><p>NettyInvocation是netty请求使用的实现类，我们来依次看看他对init,execute,onSuccess等方法的实现上相比Invocation改变了什么</p>
+<ul>
+<li>run</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        <span class="keyword">if</span> (Logger.isTraceEnabled()) &#123;</div><div class="line">            Logger.trace(<span class="string">"run: begin"</span>);</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">super</span>.run();</div><div class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">        serve500(e, ctx, nettyRequest);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> (Logger.isTraceEnabled()) &#123;</div><div class="line">        Logger.trace(<span class="string">"run: end"</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>NettyInvocation的run方法和基类唯一的差别就是包了一层try catch来处理服务器错误，这里有一点要注意，可以发现，NettyInvocation的run有一层try catch来处理500错误，PlayHandle中的messageReceived也有一层try catch来处理500错误，我的理解是前者是用来处理业务流程中的错误的，后者是为了防止意外错误引发整个服务器挂掉所以又套了一层做保险</p>
+<ul>
+<li>init</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="comment">//设置当前线程的classloader</span></div><div class="line">    Thread.currentThread().setContextClassLoader(Play.classloader);</div><div class="line">    <span class="keyword">if</span> (Logger.isTraceEnabled()) &#123;</div><div class="line">        Logger.trace(<span class="string">"init: begin"</span>);</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//设置当前线程的request和response</span></div><div class="line">    Request.current.set(request);</div><div class="line">    Response.current.set(response);</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        <span class="comment">//如果是dev模式检查路径更新</span></div><div class="line">        <span class="keyword">if</span> (Play.mode == Play.Mode.DEV) &#123;</div><div class="line">            Router.detectChanges(Play.ctxPath);</div><div class="line">        &#125;</div><div class="line">        <span class="comment">//如果是prod模式且静态路径缓存有当前请求信息，则从缓存中获取</span></div><div class="line">        <span class="keyword">if</span> (Play.mode == Play.Mode.PROD &amp;&amp; staticPathsCache.containsKey(request.domain + <span class="string">" "</span> + request.method + <span class="string">" "</span> + request.path)) &#123;</div><div class="line">            RenderStatic rs = <span class="keyword">null</span>;</div><div class="line">            <span class="keyword">synchronized</span> (staticPathsCache) &#123;</div><div class="line">                rs = staticPathsCache.get(request.domain + <span class="string">" "</span> + request.method + <span class="string">" "</span> + request.path);</div><div class="line">            &#125;</div><div class="line">            <span class="comment">//使用静态资源</span></div><div class="line">            serveStatic(rs, ctx, request, response, nettyRequest, event);</div><div class="line">            <span class="keyword">if</span> (Logger.isTraceEnabled()) &#123;</div><div class="line">                Logger.trace(<span class="string">"init: end false"</span>);</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="comment">//检查是否为静态资源</span></div><div class="line">        Router.routeOnlyStatic(request);</div><div class="line">        <span class="keyword">super</span>.init();</div><div class="line">    &#125; <span class="keyword">catch</span> (NotFound nf) &#123;</div><div class="line">        <span class="comment">//返回404</span></div><div class="line">        serve404(nf, ctx, request, nettyRequest);</div><div class="line">        <span class="keyword">if</span> (Logger.isTraceEnabled()) &#123;</div><div class="line">            Logger.trace(<span class="string">"init: end false"</span>);</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</div><div class="line">    &#125; <span class="keyword">catch</span> (RenderStatic rs) &#123;</div><div class="line">        <span class="comment">//使用静态资源</span></div><div class="line">        <span class="keyword">if</span> (Play.mode == Play.Mode.PROD) &#123;</div><div class="line">            <span class="keyword">synchronized</span> (staticPathsCache) &#123;</div><div class="line">                staticPathsCache.put(request.domain + <span class="string">" "</span> + request.method + <span class="string">" "</span> + request.path, rs);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        serveStatic(rs, ctx, request, response, nettyRequest, <span class="keyword">this</span>.event);</div><div class="line">        <span class="keyword">if</span> (Logger.isTraceEnabled()) &#123;</div><div class="line">            Logger.trace(<span class="string">"init: end false"</span>);</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (Logger.isTraceEnabled()) &#123;</div><div class="line">        Logger.trace(<span class="string">"init: end true"</span>);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>可以看出，NettyInvocation的初始化就是在基类初始化之前判断request的路径，处理静态资源以及处理路径不存在的资源，这里也就说明了访问路由设置中的静态资源是不需要启动play服务的，<del>是否意味着可以通过play搭建一个静态资源服务器？</del></p>
+<ul>
+<li>execute</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">execute</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line">    <span class="comment">//检查连接是否中断</span></div><div class="line">    <span class="keyword">if</span> (!ctx.getChannel().isConnected()) &#123;</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            ctx.getChannel().close();</div><div class="line">        &#125; <span class="keyword">catch</span> (Throwable e) &#123;</div><div class="line">            <span class="comment">// Ignore</span></div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//渲染之前检查长度</span></div><div class="line">    saveExceededSizeError(nettyRequest, request, response);</div><div class="line">    <span class="comment">//运行</span></div><div class="line">    ActionInvoker.invoke(request, response);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>ActionInvoker.invoke是play mvc的执行入口方法，这个在之后会进行详解</p>
+<ul>
+<li>success</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onSuccess</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line">    <span class="keyword">super</span>.onSuccess();</div><div class="line">    <span class="keyword">if</span> (response.chunked) &#123;</div><div class="line">        closeChunked(request, response, ctx, nettyRequest);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        copyResponse(ctx, request, response, nettyRequest);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> (Logger.isTraceEnabled()) &#123;</div><div class="line">        Logger.trace(<span class="string">"execute: end"</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>成功之后就判断是否是chunked类型的request，若是则关闭区块流并返回response，若不是则返回正常的response</p>
+<h4 id="Job"><a href="#Job" class="headerlink" title="Job"></a>Job</h4><p>Job是Play任务的基类，用来处理异步任务，Job虽然继承了Invocation，但他并不会加入至Play的主线程池执行，Job有自己单独的线程池进行处理。因为Job可能需要一个返回值，所以它同时继承了Callable接口来提供返回值。<br>既然job能提供返回值，那真正起作用的方法就是call()而不是run(),我们来看一下他的call方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> V <span class="title">call</span><span class="params">()</span> </span>&#123;</div><div class="line">    Monitor monitor = <span class="keyword">null</span>;</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        <span class="keyword">if</span> (init()) &#123;</div><div class="line">            before();</div><div class="line">            V result = <span class="keyword">null</span>;</div><div class="line"></div><div class="line">            <span class="keyword">try</span> &#123;</div><div class="line">                lastException = <span class="keyword">null</span>;</div><div class="line">                lastRun = System.currentTimeMillis();</div><div class="line">                monitor = MonitorFactory.start(getClass().getName()+<span class="string">".doJob()"</span>);</div><div class="line">                <span class="comment">//执行任务并返回结果</span></div><div class="line">                result = doJobWithResult();</div><div class="line">                monitor.stop();</div><div class="line">                monitor = <span class="keyword">null</span>;</div><div class="line">                wasError = <span class="keyword">false</span>;</div><div class="line">            &#125; <span class="keyword">catch</span> (PlayException e) &#123;</div><div class="line">                <span class="keyword">throw</span> e;</div><div class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">                StackTraceElement element = PlayException.getInterestingStrackTraceElement(e);</div><div class="line">                <span class="keyword">if</span> (element != <span class="keyword">null</span>) &#123;</div><div class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> JavaExecutionException(Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber(), e);</div><div class="line">                &#125;</div><div class="line">                <span class="keyword">throw</span> e;</div><div class="line">            &#125;</div><div class="line">            after();</div><div class="line">            <span class="keyword">return</span> result;</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">catch</span> (Throwable e) &#123;</div><div class="line">        onException(e);</div><div class="line">    &#125; <span class="keyword">finally</span> &#123;</div><div class="line">        <span class="keyword">if</span>(monitor != <span class="keyword">null</span>) &#123;</div><div class="line">            monitor.stop();</div><div class="line">        &#125;</div><div class="line">        _finally();</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>可以看出，job的call方法和Invocation的run方法其实差不多，中间执行job的代码其实就是execute方法的实现，但是有一点不同的是，job方法完成后不会调用onSuccess()方法。<br>这里只是提一下Job与Invocation类的关系，job任务的处理放在之后的插件篇再谈</p>
+<h4 id="WebSocketInvocation"><a href="#WebSocketInvocation" class="headerlink" title="WebSocketInvocation"></a>WebSocketInvocation</h4><p>WebSocketInvocation是websocket请求的实现类，我们来具体看下他对Invocation的方法做了怎么样的复写</p>
+<ul>
+<li>init</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</div><div class="line">    Http.Request.current.set(request);</div><div class="line">    Http.Inbound.current.set(inbound);</div><div class="line">    Http.Outbound.current.set(outbound);</div><div class="line">    <span class="keyword">return</span> <span class="keyword">super</span>.init();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>没什么大的变动，就是在当前线程下添加了出入站的通道信息</p>
+<ul>
+<li>execute</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">execute</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line">    WebSocketInvoker.invoke(request, inbound, outbound);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>execute方法就是将request请求，出入站通道传入WebSocketInvoker.invoke进行处理，WebSocketInvoker.invoke的代码如下，可以看出WebSocketInvoker.invoke方法也就是调用了ActionInvoker.invoke来对请求进行处理。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">invoke</span><span class="params">(Http.Request request, Http.Inbound inbound, Http.Outbound outbound)</span> </span>&#123;</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        <span class="keyword">if</span> (Play.mode == Play.Mode.DEV) &#123;</div><div class="line">            WebSocketController.class.getDeclaredField(<span class="string">"inbound"</span>).set(<span class="keyword">null</span>, Http.Inbound.current());</div><div class="line">            WebSocketController.class.getDeclaredField(<span class="string">"outbound"</span>).set(<span class="keyword">null</span>, Http.Outbound.current());</div><div class="line">            WebSocketController.class.getDeclaredField(<span class="string">"params"</span>).set(<span class="keyword">null</span>, Scope.Params.current());</div><div class="line">            WebSocketController.class.getDeclaredField(<span class="string">"request"</span>).set(<span class="keyword">null</span>, Http.Request.current());</div><div class="line">            WebSocketController.class.getDeclaredField(<span class="string">"session"</span>).set(<span class="keyword">null</span>, Scope.Session.current());</div><div class="line">            WebSocketController.class.getDeclaredField(<span class="string">"validation"</span>).set(<span class="keyword">null</span>, Validation.current());</div><div class="line">        &#125;</div><div class="line">        <span class="comment">//websocket是没有response的</span></div><div class="line">        ActionInvoker.invoke(request, <span class="keyword">null</span>);</div><div class="line">    &#125;<span class="keyword">catch</span> (PlayException e) &#123;</div><div class="line">        <span class="keyword">throw</span> e;</div><div class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> UnexpectedException(e);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>onSuccess</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onSuccess</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line">    outbound.close();</div><div class="line">    <span class="keyword">super</span>.onSuccess();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>websocket只有当连接关闭时才会触发onSuccess方法，所以onSuccess相比Invocation也就多了一个关闭出站通道的操作</p>
+<h4 id="ServletInvocation"><a href="#ServletInvocation" class="headerlink" title="ServletInvocation"></a>ServletInvocation</h4><p>ServletInvocation是当使用Servlet容器时的实现类，也就是将程序用war打包后放在Servlet容器后运行的类，ServletInvocation不直接基础于Invocation，而且继承于DirectInvocation，DirectInvocation继承了Invocation，DirectInvocation类添加了一个Suspend字段，用来处理线程暂停或等待操作。<br>因为在Servlet规范中请求线程的管理交由Servlet容器处理，所以ServletInvocation不是使用Invoker的ScheduledThreadPoolExecutor来执行的，那么在配置文件中设置play.pool数量对于使用Servlet容器的程序是无效的。<br>既然ServletInvocation不是使用Invoker中的线程池运行的，那他是从什么地方初始化这个类并运行的呢，这点将在本篇的ServletWrapper中再详解</p>
+<p>我们来看看ServletInvocation对Invocation中的方法进行了怎样的覆写</p>
+<ul>
+<li>init</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">super</span>.init();</div><div class="line">    &#125; <span class="keyword">catch</span> (NotFound e) &#123;</div><div class="line">        serve404(httpServletRequest, httpServletResponse, e);</div><div class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</div><div class="line">    &#125; <span class="keyword">catch</span> (RenderStatic r) &#123;</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            serveStatic(httpServletResponse, httpServletRequest, r);</div><div class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> UnexpectedException(e);</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>很简单的初始化，和NettyInvocation相比就是静态资源的缓存交由Servlet容器处理</p>
+<ul>
+<li>run</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        <span class="keyword">super</span>.run();</div><div class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">        serve500(e, httpServletRequest, httpServletResponse);</div><div class="line">        <span class="keyword">return</span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>与NettyInvocation一样</p>
+<ul>
+<li>execute</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">execute</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line">    ActionInvoker.invoke(request, response);</div><div class="line">    copyResponse(request, response, httpServletRequest, httpServletResponse);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>ServletInvocation在execute结束后就将结果返回，这里不知道为什么不和NettyInvocation统一一下，都在execute阶段返回结果或者都在onSuccess阶段返回结果</p>
+<p><strong>使用netty的流程我们已经理清楚了，简单来说就是讲netty的请求处理后交由ActionInvoker.invoke来执行，ActionInvoker.invoke也是之后要研究的重点。</strong></p>
+<h1 id="ServletWrapper"><a href="#ServletWrapper" class="headerlink" title="ServletWrapper"></a>ServletWrapper</h1><p>这篇的一开始我们以Server类为入口阐述了使用java命令直接运行时的运行过程，那么如果程序用war打包后放在Servlet容器中是如何运行的呢?<br>我们可以打开play程序包下resources/war的web.xml来看看默认的web.xml中是怎么配置的。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">listener</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">listener-class</span>&gt;</span>play.server.ServletWrapper<span class="tag">&lt;/<span class="name">listener-class</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">listener</span>&gt;</span></div><div class="line"></div><div class="line"><span class="tag">&lt;<span class="name">servlet</span>&gt;</span></div><div class="line">  <span class="tag">&lt;<span class="name">servlet-name</span>&gt;</span>play<span class="tag">&lt;/<span class="name">servlet-name</span>&gt;</span></div><div class="line">  <span class="tag">&lt;<span class="name">servlet-class</span>&gt;</span>play.server.ServletWrapper<span class="tag">&lt;/<span class="name">servlet-class</span>&gt;</span>	</div><div class="line"><span class="tag">&lt;/<span class="name">servlet</span>&gt;</span></div></pre></td></tr></table></figure>
+<p>可以看出监听器和servlet入口都是ServletWrapper，那我们从程序的创建开始一点点剖析play的运行过程</p>
+<h2 id="contextInitialized"><a href="#contextInitialized" class="headerlink" title="contextInitialized"></a>contextInitialized</h2><p>contextInitialized是在启动时自动加载，主要完成一些初始化的工作，代码如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">contextInitialized</span><span class="params">(ServletContextEvent e)</span> </span>&#123;</div><div class="line">    <span class="comment">//standalonePlayServer表示这是否是一个独立服务器</span></div><div class="line">    Play.standalonePlayServer = <span class="keyword">false</span>;</div><div class="line"></div><div class="line">    ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();</div><div class="line">    <span class="comment">//这是程序根目录</span></div><div class="line">    String appDir = e.getServletContext().getRealPath(<span class="string">"/WEB-INF/application"</span>);</div><div class="line">    File root = <span class="keyword">new</span> File(appDir);</div><div class="line"></div><div class="line">    <span class="comment">//play id在web.xml中配置</span></div><div class="line">    <span class="keyword">final</span> String playId = System.getProperty(<span class="string">"play.id"</span>, e.getServletContext().getInitParameter(<span class="string">"play.id"</span>));</div><div class="line">    <span class="keyword">if</span> (StringUtils.isEmpty(playId)) &#123;</div><div class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> UnexpectedException(<span class="string">"Please define a play.id parameter in your web.xml file. Without that parameter, play! cannot start your application. Please add a context-param into the WEB-INF/web.xml file."</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    Play.frameworkPath = root.getParentFile();</div><div class="line">    <span class="comment">//使用预编译的文件</span></div><div class="line">    Play.usePrecompiled = <span class="keyword">true</span>;</div><div class="line">    <span class="comment">//初始化,初始化过程中会将运行模式强制改为prod</span></div><div class="line">    Play.init(root, playId);</div><div class="line">    <span class="comment">//检查配置文件中模式是不是dev，是dev提示自动切换为prod</span></div><div class="line">    Play.Mode mode = Play.Mode.valueOf(Play.configuration.getProperty(<span class="string">"application.mode"</span>, <span class="string">"DEV"</span>).toUpperCase());</div><div class="line">    <span class="keyword">if</span> (mode.isDev()) &#123;</div><div class="line">        Logger.info(<span class="string">"Forcing PROD mode because deploying as a war file."</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// Servlet 2.4手动加载路径</span></div><div class="line">    <span class="comment">// Servlet 2.4 does not allow you to get the context path from the servletcontext...</span></div><div class="line">    <span class="keyword">if</span> (isGreaterThan(e.getServletContext(), <span class="number">2</span>, <span class="number">4</span>)) &#123;</div><div class="line">        loadRouter(e.getServletContext().getContextPath());</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    Thread.currentThread().setContextClassLoader(oldClassLoader);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>初始化过程有2个地方需要注意</p>
+<ol>
+<li>不管配置文件中使用的是什么模式，放在Servlet容器中会统一改为prod</li>
+<li>默认使用预编译模式加载</li>
+</ol>
+<h2 id="service"><a href="#service" class="headerlink" title="service"></a>service</h2><p>service是servlet处理request的方法，我们先来看一下他的实现代码<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">service</span><span class="params">(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)</span> <span class="keyword">throws</span> ServletException, IOException </span>&#123;</div><div class="line">    <span class="comment">//路由还没初始化时初始化路由</span></div><div class="line">    <span class="keyword">if</span> (!routerInitializedWithContext) &#123;</div><div class="line">        loadRouter(httpServletRequest.getContextPath());</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (Logger.isTraceEnabled()) &#123;</div><div class="line">        Logger.trace(<span class="string">"ServletWrapper&gt;service "</span> + httpServletRequest.getRequestURI());</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    Request request = <span class="keyword">null</span>;</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        Response response = <span class="keyword">new</span> Response();</div><div class="line">        response.out = <span class="keyword">new</span> ByteArrayOutputStream();</div><div class="line">        Response.current.set(response);</div><div class="line">        <span class="comment">//httpServletRequest转为play的request</span></div><div class="line">        request = parseRequest(httpServletRequest);</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (Logger.isTraceEnabled()) &#123;</div><div class="line">            Logger.trace(<span class="string">"ServletWrapper&gt;service, request: "</span> + request);</div><div class="line">        &#125;</div><div class="line">        <span class="comment">//检查插件中是否有实现</span></div><div class="line">        <span class="keyword">boolean</span> raw = Play.pluginCollection.rawInvocation(request, response);</div><div class="line">        <span class="keyword">if</span> (raw) &#123;</div><div class="line">            copyResponse(Request.current(), Response.current(), httpServletRequest, httpServletResponse);</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="comment">//这里不是Invoker.invoke()方法，是invokeInThread</span></div><div class="line">            Invoker.invokeInThread(<span class="keyword">new</span> ServletInvocation(request, response, httpServletRequest, httpServletResponse));</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">catch</span> (NotFound e) &#123;</div><div class="line">        <span class="comment">//处理404</span></div><div class="line">        <span class="keyword">if</span> (Logger.isTraceEnabled()) &#123;</div><div class="line">            Logger.trace(<span class="string">"ServletWrapper&gt;service, NotFound: "</span> + e);</div><div class="line">        &#125;</div><div class="line">        serve404(httpServletRequest, httpServletResponse, e);</div><div class="line">        <span class="keyword">return</span>;</div><div class="line">    &#125; <span class="keyword">catch</span> (RenderStatic e) &#123;</div><div class="line">        <span class="comment">//处理静态资源</span></div><div class="line">        <span class="keyword">if</span> (Logger.isTraceEnabled()) &#123;</div><div class="line">            Logger.trace(<span class="string">"ServletWrapper&gt;service, RenderStatic: "</span> + e);</div><div class="line">        &#125;</div><div class="line">        serveStatic(httpServletResponse, httpServletRequest, e);</div><div class="line">        <span class="keyword">return</span>;</div><div class="line">    &#125; <span class="keyword">catch</span>(URISyntaxException e) &#123;</div><div class="line">        <span class="comment">//处理404</span></div><div class="line">        serve404(httpServletRequest, httpServletResponse, <span class="keyword">new</span> NotFound(e.toString()));</div><div class="line">        <span class="keyword">return</span>;</div><div class="line">    &#125; <span class="keyword">catch</span> (Throwable e) &#123;</div><div class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> ServletException(e);</div><div class="line">    &#125; <span class="keyword">finally</span> &#123;</div><div class="line">        <span class="comment">//因为servlet的线程会复用，所以要手动删除当前线程内的值</span></div><div class="line">        Request.current.remove();</div><div class="line">        Response.current.remove();</div><div class="line">        Scope.Session.current.remove();</div><div class="line">        Scope.Params.current.remove();</div><div class="line">        Scope.Flash.current.remove();</div><div class="line">        Scope.RenderArgs.current.remove();</div><div class="line">        Scope.RouteArgs.current.remove();</div><div class="line">        CachedBoundActionMethodArgs.clear();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>看的出和PlayHandle其实就是一个处理方式，先转为play的request再扔到Invoker类中进行处理，那么我们来看看Invoker.invokeInThread的具体实现过程</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">invokeInThread</span><span class="params">(DirectInvocation invocation)</span> </span>&#123;</div><div class="line">    <span class="keyword">boolean</span> retry = <span class="keyword">true</span>;</div><div class="line">    <span class="keyword">while</span> (retry) &#123;</div><div class="line">        invocation.run();</div><div class="line">        <span class="keyword">if</span> (invocation.retry == <span class="keyword">null</span>) &#123;</div><div class="line">            retry = <span class="keyword">false</span>;</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">try</span> &#123;</div><div class="line">                <span class="keyword">if</span> (invocation.retry.task != <span class="keyword">null</span>) &#123;</div><div class="line">                    invocation.retry.task.get();</div><div class="line">                &#125; <span class="keyword">else</span> &#123;</div><div class="line">                    Thread.sleep(invocation.retry.timeout);</div><div class="line">                &#125;</div><div class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> UnexpectedException(e);</div><div class="line">            &#125;</div><div class="line">            retry = <span class="keyword">true</span>;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>invokeInThread就是在当前线程下运行invocation，如果遇到暂停或者等待任务完成就循环直到完成。<br><strong>要注意的一点是，Play 1.2.6未完成servlet模式下的websocket实现，所以如果要用websocket请用netty模式</strong></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>至此，play的2种正常运行的启动逻辑已经分析完毕，play的启动过程还是在与不同的服务器运行容器打交道，如何将转化后的请求交由ActionInvoker来处理。<br>下一篇，我们先不看ActionInvoker的具体实现，先看看play对配置文件及路由的分析处理过程。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/program/" rel="tag"># program</a>
+          
+            <a href="/tags/源码解析/" rel="tag"># 源码解析</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/Play-framework源码解析-Part1-Play-framework-介绍、项目构成及启动脚本解析.html" rel="next" title="Play framework源码解析 Part1:Play framework 介绍、项目构成及启动脚本解析">
+                <i class="fa fa-chevron-left"></i> Play framework源码解析 Part1:Play framework 介绍、项目构成及启动脚本解析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/Play-framework源码解析-Part3-Play的初始化与启动.html" rel="prev" title="Play framework源码解析 Part3:Play的初始化与启动">
+                Play framework源码解析 Part3:Play的初始化与启动 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMTYyNy84MTkx"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">苗苗</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/asukaonly" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://weibo.com/u/3986621816" target="_blank" title="微博">
+                    
+                      <i class="fa fa-fw fa-weibo"></i>微博</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Server类"><span class="nav-number">1.</span> <span class="nav-text">Server类</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HttpServerPipelineFactory"><span class="nav-number">1.1.</span> <span class="nav-text">HttpServerPipelineFactory</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SslHttpServerPipelineFactory"><span class="nav-number">1.2.</span> <span class="nav-text">SslHttpServerPipelineFactory</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PlayHandler"><span class="nav-number">1.3.</span> <span class="nav-text">PlayHandler</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#messageReceived"><span class="nav-number">1.3.1.</span> <span class="nav-text">messageReceived</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Invocation"><span class="nav-number">1.3.2.</span> <span class="nav-text">Invocation</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#NettyInvocation"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">NettyInvocation</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Job"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">Job</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#WebSocketInvocation"><span class="nav-number">1.3.2.3.</span> <span class="nav-text">WebSocketInvocation</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ServletInvocation"><span class="nav-number">1.3.2.4.</span> <span class="nav-text">ServletInvocation</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ServletWrapper"><span class="nav-number">2.</span> <span class="nav-text">ServletWrapper</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#contextInitialized"><span class="nav-number">2.1.</span> <span class="nav-text">contextInitialized</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#service"><span class="nav-number">2.2.</span> <span class="nav-text">service</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-star"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">苗苗</span>
+
+  
+  <span class="post-meta-divider">|</span>
+<span>Hosted by <a href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a></span>
+</div>
+
+
+
+  <div class="powered-by">由 <a class="theme-link" rel="external nofollow" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" rel="external nofollow" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="//libs.baidu.com/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("hCFRloPXiR1VJQP6yPs2g5hL-gzGzoHsz", "bHgMH9e2qbwwTrnGPNw8CLwt");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
