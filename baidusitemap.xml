@@ -1,167 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-
-
-    
+  <url>
+    <loc>http://luyanliang.top/Play-framework%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90-Part5-%E6%A8%A1%E6%9D%BF%E6%B8%B2%E6%9F%93.html</loc>
+    <lastmod>2019-03-14</lastmod>
+  </url>
   <url>
     <loc>http://luyanliang.top/Play-framework%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90-Part4-ActionInvoker%E4%B8%8Emvc.html</loc>
-    <lastmod>2018-02-23T04:10:44.367Z</lastmod>
-    <data>
-        <display>
-        <title>Play framework源码解析 Part4:ActionInvoker与mvc</title>
-        <pubTime>2018-01-24T09:34:27.000Z</pubTime>
-        
-        <tag>program</tag>
-         
-        <tag>源码解析</tag>
-         
-         
-           
-             
-              <breadCrumb title="program" url="http://luyanliang.top/categories/program/"/>
-          
-             
-              <breadCrumb title="java" url="http://luyanliang.top/categories/program/java/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
+    <lastmod>2018-10-21</lastmod>
+  </url>
   <url>
     <loc>http://luyanliang.top/Play-framework%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90%E7%9B%AE%E5%BD%95.html</loc>
-    <lastmod>2018-02-12T11:21:00.004Z</lastmod>
-    <data>
-        <display>
-        <title>Play framework源码解析目录</title>
-        <pubTime>2018-01-01T05:09:05.000Z</pubTime>
-        
-         
-           
-        </display>
-    </data>
-    </url>
-
-    
+    <lastmod>2018-04-01</lastmod>
+  </url>
   <url>
     <loc>http://luyanliang.top/Play-framework%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90-Part3-Play%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96%E4%B8%8E%E5%90%AF%E5%8A%A8.html</loc>
-    <lastmod>2018-02-12T11:21:00.001Z</lastmod>
-    <data>
-        <display>
-        <title>Play framework源码解析 Part3:Play的初始化与启动</title>
-        <pubTime>2018-01-20T07:52:41.000Z</pubTime>
-        
-        <tag>program</tag>
-         
-        <tag>源码解析</tag>
-         
-         
-           
-             
-              <breadCrumb title="program" url="http://luyanliang.top/categories/program/"/>
-          
-             
-              <breadCrumb title="java" url="http://luyanliang.top/categories/program/java/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
+    <lastmod>2018-02-12</lastmod>
+  </url>
   <url>
     <loc>http://luyanliang.top/Play-framework%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90-Part2-Server%E4%B8%8EServletWrapper.html</loc>
-    <lastmod>2018-01-28T14:02:39.117Z</lastmod>
-    <data>
-        <display>
-        <title>Play framework源码解析 Part2:Server与ServletWrapper</title>
-        <pubTime>2018-01-11T07:16:54.000Z</pubTime>
-        
-        <tag>program</tag>
-         
-        <tag>源码解析</tag>
-         
-         
-           
-             
-              <breadCrumb title="program" url="http://luyanliang.top/categories/program/"/>
-          
-             
-              <breadCrumb title="java" url="http://luyanliang.top/categories/program/java/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
+    <lastmod>2018-01-28</lastmod>
+  </url>
   <url>
     <loc>http://luyanliang.top/Play-framework%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90-Part1-Play-framework-%E4%BB%8B%E7%BB%8D%E3%80%81%E9%A1%B9%E7%9B%AE%E6%9E%84%E6%88%90%E5%8F%8A%E5%90%AF%E5%8A%A8%E8%84%9A%E6%9C%AC%E8%A7%A3%E6%9E%90.html</loc>
-    <lastmod>2018-01-28T14:02:39.116Z</lastmod>
-    <data>
-        <display>
-        <title>Play framework源码解析 Part1:Play framework 介绍、项目构成及启动脚本解析</title>
-        <pubTime>2018-01-03T05:56:21.000Z</pubTime>
-        
-        <tag>program</tag>
-         
-        <tag>源码解析</tag>
-         
-         
-           
-             
-              <breadCrumb title="program" url="http://luyanliang.top/categories/program/"/>
-          
-             
-              <breadCrumb title="java" url="http://luyanliang.top/categories/program/java/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
+    <lastmod>2018-01-28</lastmod>
+  </url>
   <url>
     <loc>http://luyanliang.top/Chrome-BackCompat%E6%A8%A1%E5%BC%8F%E4%B8%8B%E5%BC%95%E5%8F%91%E7%9A%84%E4%B8%80%E4%BA%9B%E9%97%AE%E9%A2%98.html</loc>
-    <lastmod>2017-11-09T13:41:50.000Z</lastmod>
-    <data>
-        <display>
-        <title>Chrome BackCompat模式下引发的一些问题</title>
-        <pubTime>2017-11-08T06:22:32.000Z</pubTime>
-        
-        <tag>program</tag>
-         
-        <tag>js</tag>
-         
-         
-           
-             
-              <breadCrumb title="program" url="http://luyanliang.top/categories/program/"/>
-          
-             
-              <breadCrumb title="js" url="http://luyanliang.top/categories/program/js/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://luyanliang.top/hello-world.html</loc>
-    <lastmod>2017-11-08T13:09:26.000Z</lastmod>
-    <data>
-        <display>
-        <title>Hello World</title>
-        <pubTime>2017-07-11T11:10:47.000Z</pubTime>
-        
-        <tag>test</tag>
-         
-         
-           
-             
-              <breadCrumb title="test" url="http://luyanliang.top/categories/test/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-    
-</urlset>
+    <lastmod>2017-11-09</lastmod>
+  </url>
+</urlset> 
