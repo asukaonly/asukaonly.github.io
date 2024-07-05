@@ -1,0 +1,4 @@
+baseURL = 'https://example.org/'
+languageCode = 'en-us'
+title = '404 NOT FOUND'
+theme = "hugo-coder"

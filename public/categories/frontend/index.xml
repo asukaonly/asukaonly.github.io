@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Frontend on 404 NOT FOUND</title>
+    <link>http://localhost:1313/categories/frontend/</link>
+    <description>Recent content in Frontend on 404 NOT FOUND</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 08 Nov 2017 14:22:32 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/categories/frontend/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Chrome BackCompat模式下引发的一些问题</title>
+      <link>http://localhost:1313/posts/other/chrome-backcompat%E6%A8%A1%E5%BC%8F%E4%B8%8B%E5%BC%95%E5%8F%91%E7%9A%84%E4%B8%80%E4%BA%9B%E9%97%AE%E9%A2%98/</link>
+      <pubDate>Wed, 08 Nov 2017 14:22:32 +0000</pubDate>
+      <guid>http://localhost:1313/posts/other/chrome-backcompat%E6%A8%A1%E5%BC%8F%E4%B8%8B%E5%BC%95%E5%8F%91%E7%9A%84%E4%B8%80%E4%BA%9B%E9%97%AE%E9%A2%98/</guid>
+      <description>今天在使用vue和layer写一个页面的时候遇到一个诡异的问题，在调用layer.open()时弹出层并没有出现，但是背后的遮罩层出现了，在查看html代码后发现弹出层style的top值有问题，于是翻阅layer的代码，发现计算弹出层位置的坐标是通过调用jquery的height()函数计算当前窗口可视的高度，再减去弹出层的高度除以2得来的。&#xA;var that = this, config = that.config, layero = that.layero; var area = [layero.outerWidth(), layero.outerHeight()]; var type = typeof config.offset === &amp;#39;object&amp;#39;; that.offsetTop = (win.height() - area[1])/2; that.offsetLeft = (win.width() - area[0])/2; 在控制台中使用$(window).height()测试后发现结果与实际不符，猜测可能是jquery版本太低有bug或者jquery与我某个js冲突了，去翻阅jquery的代码，jquery中height()的实现代码如下：&#xA;jQuery.each({ Height: &amp;#34;height&amp;#34;, Width: &amp;#34;width&amp;#34; }, function(name, type) { jQuery.each({ padding: &amp;#34;inner&amp;#34; + name, content: type, &amp;#34;&amp;#34;: &amp;#34;outer&amp;#34; + name }, function(defaultExtra, funcName) { // margin is only for outerHeight, outerWidth jQuery.fn[funcName] = function(margin, value) { var chainable = arguments.</description>
+    </item>
+  </channel>
+</rss>

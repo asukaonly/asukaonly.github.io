@@ -1,0 +1,18 @@
+description = "「What is mind? No matter.What is matter? Never mind.」"
+keywords = "blog,developer,personal,"
+avatarurl = "avatar.png"
+info = ["What is mind? ", "No matter. ", "What is matter? ", "Never mind."]
+
+
+[[social]]
+name = "Github"
+icon = "fa-brands fa-github fa-2x"
+weight = 1
+url = "https://github.com/asukaonly"
+target = "_blank"
+[[social]]
+name = "Twitter"
+icon = "fa-brands fa-x-twitter fa-2x"
+weight = 2
+url = "https://twitter.com/my_lifefor_aiur"
+target = "_blank"

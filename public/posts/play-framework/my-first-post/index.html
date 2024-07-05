@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <title>
+  Play framework源码解析 Part1: Play framework 介绍、项目构成及启动脚本解析 · 404 NOT FOUND
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="description" content="注：本系列文章所用play版本为1.2.6
+介绍 Link to heading Play framework是个轻量级的RESTful框架，致力于让java程序员实现快速高效开发，它具有以下几个方面的优势：
+热加载。在调试模式下，所有修改会及时生效。 抛弃xml配置文件。约定大于配置。 支持异步编程 无状态mvc框架，拓展性良好 简单的路由设置 这里附上Play framework的文档地址，官方有更为详尽的功能叙述。Play framework文档
+项目构成 Link to heading play framework的初始化非常简单，只要下载了play的软件包后，在命令行中运行play new xxx即可初始化一个项目。 自动生成的项目结构如下：
+运行play程序也非常简单，在项目目录下使用
+play run 即可运行。
+启动脚本解析 Link to heading play framework软件包目录 Link to heading 为了更好的了解play framework的运作原理，我们来从play framework的启动脚本开始分析，分析启动脚本有助于我们了解play framework的运行过程。
+play的启动脚本是使用python编写的，脚本的入口为play软件包根目录下的play文件,下面我们将从play这个脚本的主入口开始分析。
+play脚本解析 Link to heading play脚本在开头引入了3个类，分别为play.cmdloader,play.application,play.utils，从添加的系统参数中可以看出play启动脚本的存放路径为 framework/pym cmdloader.py的主要作用为加载framework/pym/commands下的各个脚本文件，用于之后对命令参数的解释运行 application.py的主要作用为解析项目路径下conf/中的配置文件、加载模块、拼接最后运行的java命令
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(sys.argv[0])), &#39;framework&#39;, &#39;pym&#39;)) from play.cmdloader import CommandLoader from play.application import PlayApplication from play.utils import * 在脚本的开头，有这么一段代码，意味着只要在play主程序根目录下创建一个名为id的文件，即可设置默认的框架id
+play_env[&#34;id_file&#34;] = os.path.join(play_env[&#39;basedir&#39;], &#39;id&#39;) if os.">
+<meta name="keywords" content="">
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Play framework源码解析 Part1: Play framework 介绍、项目构成及启动脚本解析">
+  <meta name="twitter:description" content="注：本系列文章所用play版本为1.2.6
+介绍 Link to heading Play framework是个轻量级的RESTful框架，致力于让java程序员实现快速高效开发，它具有以下几个方面的优势：
+热加载。在调试模式下，所有修改会及时生效。 抛弃xml配置文件。约定大于配置。 支持异步编程 无状态mvc框架，拓展性良好 简单的路由设置 这里附上Play framework的文档地址，官方有更为详尽的功能叙述。Play framework文档
+项目构成 Link to heading play framework的初始化非常简单，只要下载了play的软件包后，在命令行中运行play new xxx即可初始化一个项目。 自动生成的项目结构如下：
+运行play程序也非常简单，在项目目录下使用
+play run 即可运行。
+启动脚本解析 Link to heading play framework软件包目录 Link to heading 为了更好的了解play framework的运作原理，我们来从play framework的启动脚本开始分析，分析启动脚本有助于我们了解play framework的运行过程。
+play的启动脚本是使用python编写的，脚本的入口为play软件包根目录下的play文件,下面我们将从play这个脚本的主入口开始分析。
+play脚本解析 Link to heading play脚本在开头引入了3个类，分别为play.cmdloader,play.application,play.utils，从添加的系统参数中可以看出play启动脚本的存放路径为 framework/pym cmdloader.py的主要作用为加载framework/pym/commands下的各个脚本文件，用于之后对命令参数的解释运行 application.py的主要作用为解析项目路径下conf/中的配置文件、加载模块、拼接最后运行的java命令
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(sys.argv[0])), &#39;framework&#39;, &#39;pym&#39;)) from play.cmdloader import CommandLoader from play.application import PlayApplication from play.utils import * 在脚本的开头，有这么一段代码，意味着只要在play主程序根目录下创建一个名为id的文件，即可设置默认的框架id
+play_env[&#34;id_file&#34;] = os.path.join(play_env[&#39;basedir&#39;], &#39;id&#39;) if os.">
+
+<meta property="og:url" content="http://localhost:1313/posts/play-framework/my-first-post/">
+  <meta property="og:site_name" content="404 NOT FOUND">
+  <meta property="og:title" content="Play framework源码解析 Part1: Play framework 介绍、项目构成及启动脚本解析">
+  <meta property="og:description" content="注：本系列文章所用play版本为1.2.6
+介绍 Link to heading Play framework是个轻量级的RESTful框架，致力于让java程序员实现快速高效开发，它具有以下几个方面的优势：
+热加载。在调试模式下，所有修改会及时生效。 抛弃xml配置文件。约定大于配置。 支持异步编程 无状态mvc框架，拓展性良好 简单的路由设置 这里附上Play framework的文档地址，官方有更为详尽的功能叙述。Play framework文档
+项目构成 Link to heading play framework的初始化非常简单，只要下载了play的软件包后，在命令行中运行play new xxx即可初始化一个项目。 自动生成的项目结构如下：
+运行play程序也非常简单，在项目目录下使用
+play run 即可运行。
+启动脚本解析 Link to heading play framework软件包目录 Link to heading 为了更好的了解play framework的运作原理，我们来从play framework的启动脚本开始分析，分析启动脚本有助于我们了解play framework的运行过程。
+play的启动脚本是使用python编写的，脚本的入口为play软件包根目录下的play文件,下面我们将从play这个脚本的主入口开始分析。
+play脚本解析 Link to heading play脚本在开头引入了3个类，分别为play.cmdloader,play.application,play.utils，从添加的系统参数中可以看出play启动脚本的存放路径为 framework/pym cmdloader.py的主要作用为加载framework/pym/commands下的各个脚本文件，用于之后对命令参数的解释运行 application.py的主要作用为解析项目路径下conf/中的配置文件、加载模块、拼接最后运行的java命令
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(sys.argv[0])), &#39;framework&#39;, &#39;pym&#39;)) from play.cmdloader import CommandLoader from play.application import PlayApplication from play.utils import * 在脚本的开头，有这么一段代码，意味着只要在play主程序根目录下创建一个名为id的文件，即可设置默认的框架id
+play_env[&#34;id_file&#34;] = os.path.join(play_env[&#39;basedir&#39;], &#39;id&#39;) if os.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2018-01-03T13:56:21+00:00">
+    <meta property="article:modified_time" content="2018-01-03T13:56:21+00:00">
+
+
+
+
+<link rel="canonical" href="http://localhost:1313/posts/play-framework/my-first-post/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.css" media="screen">
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+<body class="preload-transitions colorscheme-light">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="http://localhost:1313/">
+      404 NOT FOUND
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="http://localhost:1313/posts/play-framework/my-first-post/">
+              Play framework源码解析 Part1: Play framework 介绍、项目构成及启动脚本解析
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2018-01-03T13:56:21Z">
+                January 3, 2018
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              6-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p><font color=#DC143C >注：本系列文章所用play版本为1.2.6</font></p>
+<hr>
+<h1 id="介绍">
+  介绍
+  <a class="heading-link" href="#%e4%bb%8b%e7%bb%8d">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>Play framework是个轻量级的RESTful框架，致力于让java程序员实现快速高效开发，它具有以下几个方面的优势：</p>
+<ol>
+<li>热加载。在调试模式下，所有修改会及时生效。</li>
+<li>抛弃xml配置文件。约定大于配置。</li>
+<li>支持异步编程</li>
+<li>无状态mvc框架，拓展性良好</li>
+<li>简单的路由设置</li>
+</ol>
+<p>这里附上Play framework的文档地址，官方有更为详尽的功能叙述。<a href="https://www.playframework.com/documentation/1.2.x/overview" title="文档"  class="external-link" target="_blank" rel="noopener">Play framework文档</a></p>
+<hr>
+<!-- more -->
+<h1 id="项目构成">
+  项目构成
+  <a class="heading-link" href="#%e9%a1%b9%e7%9b%ae%e6%9e%84%e6%88%90">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>play framework的初始化非常简单，只要下载了play的软件包后，在命令行中运行play new xxx即可初始化一个项目。
+自动生成的项目结构如下：</p>
+<p><img src="https://i.loli.net/2018/01/08/5a53879bec91f.png" alt="play项目结构"></p>
+<p>运行play程序也非常简单，在项目目录下使用</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>play run
+</span></span></code></pre></div><p>即可运行。</p>
+<hr>
+<h1 id="启动脚本解析">
+  启动脚本解析
+  <a class="heading-link" href="#%e5%90%af%e5%8a%a8%e8%84%9a%e6%9c%ac%e8%a7%a3%e6%9e%90">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<h2 id="play-framework软件包目录">
+  play framework软件包目录
+  <a class="heading-link" href="#play-framework%e8%bd%af%e4%bb%b6%e5%8c%85%e7%9b%ae%e5%bd%95">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>为了更好的了解play framework的运作原理，我们来从play framework的启动脚本开始分析，分析启动脚本有助于我们了解play framework的运行过程。</p>
+<p>play的启动脚本是使用python编写的，脚本的入口为play软件包根目录下的play文件,下面我们将从play这个脚本的主入口开始分析。</p>
+<p><img src="https://i.loli.net/2018/01/08/5a5386dfdfdb6.png" alt="play项目结构"></p>
+<h2 id="play脚本解析">
+  play脚本解析
+  <a class="heading-link" href="#play%e8%84%9a%e6%9c%ac%e8%a7%a3%e6%9e%90">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>play脚本在开头引入了3个类，分别为play.cmdloader,play.application,play.utils，从添加的系统参数中可以看出play启动脚本的存放路径为 framework/pym
+cmdloader.py的主要作用为加载framework/pym/commands下的各个脚本文件，用于之后对命令参数的解释运行
+application.py的主要作用为解析项目路径下conf/中的配置文件、加载模块、拼接最后运行的java命令</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>sys<span style="color:#555">.</span>path<span style="color:#555">.</span>append(os<span style="color:#555">.</span>path<span style="color:#555">.</span>join(os<span style="color:#555">.</span>path<span style="color:#555">.</span>dirname(os<span style="color:#555">.</span>path<span style="color:#555">.</span>realpath(sys<span style="color:#555">.</span>argv[<span style="color:#f60">0</span>])), <span style="color:#c30">&#39;framework&#39;</span>, <span style="color:#c30">&#39;pym&#39;</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">from</span> <span style="color:#0cf;font-weight:bold">play.cmdloader</span> <span style="color:#069;font-weight:bold">import</span> CommandLoader
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">from</span> <span style="color:#0cf;font-weight:bold">play.application</span> <span style="color:#069;font-weight:bold">import</span> PlayApplication
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">from</span> <span style="color:#0cf;font-weight:bold">play.utils</span> <span style="color:#069;font-weight:bold">import</span> <span style="color:#555">*</span>
+</span></span></code></pre></div><p>在脚本的开头，有这么一段代码，意味着只要在play主程序根目录下创建一个名为id的文件，即可设置默认的框架id</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>play_env[<span style="color:#c30">&#34;id_file&#34;</span>] <span style="color:#555">=</span> os<span style="color:#555">.</span>path<span style="color:#555">.</span>join(play_env[<span style="color:#c30">&#39;basedir&#39;</span>], <span style="color:#c30">&#39;id&#39;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">if</span> os<span style="color:#555">.</span>path<span style="color:#555">.</span>exists(play_env[<span style="color:#c30">&#34;id_file&#34;</span>]):
+</span></span><span style="display:flex;"><span>    play_env[<span style="color:#c30">&#34;id&#34;</span>] <span style="color:#555">=</span> <span style="color:#366">open</span>(play_env[<span style="color:#c30">&#34;id_file&#34;</span>])<span style="color:#555">.</span>readline()<span style="color:#555">.</span>strip()
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">else</span>:
+</span></span><span style="display:flex;"><span>    play_env[<span style="color:#c30">&#34;id&#34;</span>] <span style="color:#555">=</span> <span style="color:#c30">&#39;&#39;</span>
+</span></span></code></pre></div><p>命令参数的分隔由以下代码完成，例如使用了play run &ndash;%test,那么参数列表就是</p>
+<blockquote>
+<p>[&ldquo;xxxx\play&rdquo;,&ldquo;run&rdquo;,&quot;&ndash;%test&quot;]</p>
+</blockquote>
+<p>这段代码也说明了，play的命令格式为</p>
+<blockquote>
+<p>play cmd [app_path] [&ndash;options]</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>application_path <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">None</span>
+</span></span><span style="display:flex;"><span>remaining_args <span style="color:#555">=</span> []
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">if</span> <span style="color:#366">len</span>(sys<span style="color:#555">.</span>argv) <span style="color:#555">==</span> <span style="color:#f60">1</span>:
+</span></span><span style="display:flex;"><span>    application_path <span style="color:#555">=</span> os<span style="color:#555">.</span>getcwd()
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">if</span> <span style="color:#366">len</span>(sys<span style="color:#555">.</span>argv) <span style="color:#555">==</span> <span style="color:#f60">2</span>:
+</span></span><span style="display:flex;"><span>    application_path <span style="color:#555">=</span> os<span style="color:#555">.</span>getcwd()
+</span></span><span style="display:flex;"><span>    remaining_args <span style="color:#555">=</span> sys<span style="color:#555">.</span>argv[<span style="color:#f60">2</span>:]
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">if</span> <span style="color:#366">len</span>(sys<span style="color:#555">.</span>argv) <span style="color:#555">&gt;</span> <span style="color:#f60">2</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">if</span> sys<span style="color:#555">.</span>argv[<span style="color:#f60">2</span>]<span style="color:#555">.</span>startswith(<span style="color:#c30">&#39;-&#39;</span>):
+</span></span><span style="display:flex;"><span>        application_path <span style="color:#555">=</span> os<span style="color:#555">.</span>getcwd()
+</span></span><span style="display:flex;"><span>        remaining_args <span style="color:#555">=</span> sys<span style="color:#555">.</span>argv[<span style="color:#f60">2</span>:]
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">else</span>:
+</span></span><span style="display:flex;"><span>        application_path <span style="color:#555">=</span> os<span style="color:#555">.</span>path<span style="color:#555">.</span>normpath(os<span style="color:#555">.</span>path<span style="color:#555">.</span>abspath(sys<span style="color:#555">.</span>argv[<span style="color:#f60">2</span>]))
+</span></span><span style="display:flex;"><span>        remaining_args <span style="color:#555">=</span> sys<span style="color:#555">.</span>argv[<span style="color:#f60">3</span>:]
+</span></span></code></pre></div><p>在play参数中，有一个ignoreMissing，这个参数的全称其实是ignoreMissingModules，作用就是在当配置文件中配置有模块但是在play目录下并没有找到时是否忽略，如需忽略那么在启动时需要加入<code>--force</code></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>ignoreMissing <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">False</span>
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">if</span> remaining_args<span style="color:#555">.</span>count(<span style="color:#c30">&#39;--force&#39;</span>) <span style="color:#555">==</span> <span style="color:#f60">1</span>:
+</span></span><span style="display:flex;"><span>    remaining_args<span style="color:#555">.</span>remove(<span style="color:#c30">&#39;--force&#39;</span>)
+</span></span><span style="display:flex;"><span>    ignoreMissing <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">True</span>
+</span></span></code></pre></div><p>脚本通过</p>
+<blockquote>
+<p>play_app = PlayApplication(application_path, play_env, ignoreMissing)</p>
+</blockquote>
+<p>和</p>
+<blockquote>
+<p>cmdloader = CommandLoader(play_env[&ldquo;basedir&rdquo;])</p>
+</blockquote>
+<p>来进行PlayApplication类和CommandLoader类的初始化。
+在PlayApplication类的初始化过程中，它创建了PlayConfParser类用来解析配置文件，这也就是说play的配置文件解析是在脚本启动阶段进行的，<strong>这也是为什么修改配置文件无法实时生效需要重启的原因</strong><br>
+在PlayConfParser中有一个常量DEFAULTS储存了默认的http端口和jpda调试端口，分别为9000和8000，需要添加默认值可以修改DEFAULTS，DEFAULTS内的值只有当配置文件中找不到时才会生效。</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>DEFAULTS <span style="color:#555">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#c30">&#39;http.port&#39;</span>: <span style="color:#c30">&#39;9000&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#c30">&#39;jpda.port&#39;</span>: <span style="color:#c30">&#39;8000&#39;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>值得一提的是，配置文件中的http.port的优先级是小于命令参数中的http.port的</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#09f;font-style:italic">#env为命令参数</span>
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">if</span> env<span style="color:#555">.</span>has_key(<span style="color:#c30">&#39;http.port&#39;</span>):
+</span></span><span style="display:flex;"><span>    self<span style="color:#555">.</span>entries[<span style="color:#c30">&#39;http.port&#39;</span>] <span style="color:#555">=</span> env[<span style="color:#c30">&#39;http.port&#39;</span>]
+</span></span></code></pre></div><p>CommandLoader类的功能很简单，就是遍历framework/pym/commands下的.py文件，依次加载然后读取他的全局变量COMMANDS和MODULE储存用于之后的命令处理和模块加载。</p>
+<p>回到play脚本中，在PlayApplication类和CommandLoader类初始化完成之后，play进行&quot;&ndash;deps&quot;参数的检查，如果存在&ndash;deps，则调用play.deps.DependenciesManager类来进行依赖的检查、更新。DependenciesManager的解析将放到后话详解。</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">if</span> remaining_args<span style="color:#555">.</span>count(<span style="color:#c30">&#39;--deps&#39;</span>) <span style="color:#555">==</span> <span style="color:#f60">1</span>:
+</span></span><span style="display:flex;"><span>    cmdloader<span style="color:#555">.</span>commands[<span style="color:#c30">&#39;dependencies&#39;</span>]<span style="color:#555">.</span>execute(command<span style="color:#555">=</span><span style="color:#c30">&#39;dependencies&#39;</span>, app<span style="color:#555">=</span>play_app, args<span style="color:#555">=</span>[<span style="color:#c30">&#39;--sync&#39;</span>], env<span style="color:#555">=</span>play_env, cmdloader<span style="color:#555">=</span>cmdloader)
+</span></span><span style="display:flex;"><span>    remaining_args<span style="color:#555">.</span>remove(<span style="color:#c30">&#39;--deps&#39;</span>)
+</span></span></code></pre></div><p>接下来，play便正式进行启动过程，play按照以下的顺序进行加载：</p>
+<ol>
+<li>加载配置文件中记录的模块的命令信息</li>
+<li>加载参数中指定的模块的命令信息</li>
+<li>运行各模块中的before函数</li>
+<li>执行play_command,play_command即为run,test,war等play需要的执行的命令</li>
+<li>运行各模块中的after函数</li>
+<li>结束脚本</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">if</span> play_command <span style="color:#000;font-weight:bold">in</span> cmdloader<span style="color:#555">.</span>commands:
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">for</span> name <span style="color:#000;font-weight:bold">in</span> cmdloader<span style="color:#555">.</span>modules:
+</span></span><span style="display:flex;"><span>        module <span style="color:#555">=</span> cmdloader<span style="color:#555">.</span>modules[name]
+</span></span><span style="display:flex;"><span>        <span style="color:#069;font-weight:bold">if</span> <span style="color:#c30">&#39;before&#39;</span> <span style="color:#000;font-weight:bold">in</span> <span style="color:#366">dir</span>(module):
+</span></span><span style="display:flex;"><span>            module<span style="color:#555">.</span>before(command<span style="color:#555">=</span>play_command, app<span style="color:#555">=</span>play_app, args<span style="color:#555">=</span>remaining_args, env<span style="color:#555">=</span>play_env)
+</span></span><span style="display:flex;"><span>    status <span style="color:#555">=</span> cmdloader<span style="color:#555">.</span>commands[play_command]<span style="color:#555">.</span>execute(command<span style="color:#555">=</span>play_command, app<span style="color:#555">=</span>play_app, args<span style="color:#555">=</span>remaining_args, env<span style="color:#555">=</span>play_env, cmdloader<span style="color:#555">=</span>cmdloader)
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">for</span> name <span style="color:#000;font-weight:bold">in</span> cmdloader<span style="color:#555">.</span>modules:
+</span></span><span style="display:flex;"><span>        module <span style="color:#555">=</span> cmdloader<span style="color:#555">.</span>modules[name]
+</span></span><span style="display:flex;"><span>        <span style="color:#069;font-weight:bold">if</span> <span style="color:#c30">&#39;after&#39;</span> <span style="color:#000;font-weight:bold">in</span> <span style="color:#366">dir</span>(module):
+</span></span><span style="display:flex;"><span>            module<span style="color:#555">.</span>after(command<span style="color:#555">=</span>play_command, app<span style="color:#555">=</span>play_app, args<span style="color:#555">=</span>remaining_args, env<span style="color:#555">=</span>play_env)
+</span></span><span style="display:flex;"><span>    sys<span style="color:#555">.</span>exit(status)
+</span></span></code></pre></div><p>下面，我们来看看play常用命令的运行过程&hellip;</p>
+<h2 id="play常用运行命令解析">
+  Play常用运行命令解析
+  <a class="heading-link" href="#play%e5%b8%b8%e7%94%a8%e8%bf%90%e8%a1%8c%e5%91%bd%e4%bb%a4%e8%a7%a3%e6%9e%90">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>在本节的一开始，我决定先把play所有的可用命令先列举一下，以便读者可以选择性阅读。</p>
+<table>
+<thead>
+<tr>
+<th>命令名称</th>
+<th>命令所在文件</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>antify</td>
+<td>ant.py</td>
+<td>初始化ant构建工具的build.xml文件</td>
+</tr>
+<tr>
+<td>run</td>
+<td>base.py</td>
+<td>运行程序</td>
+</tr>
+<tr>
+<td>new</td>
+<td>base.py</td>
+<td>新建play应用</td>
+</tr>
+<tr>
+<td>clean</td>
+<td>base.py</td>
+<td>删除临时文件，即清空tmp文件夹</td>
+</tr>
+<tr>
+<td>test</td>
+<td>base.py</td>
+<td>运行测试程序</td>
+</tr>
+<tr>
+<td>autotest、auto-test</td>
+<td>base.py</td>
+<td>自动运行所有测试项目</td>
+</tr>
+<tr>
+<td>id</td>
+<td>base.py</td>
+<td>设置项目id</td>
+</tr>
+<tr>
+<td>new,run</td>
+<td>base.py</td>
+<td>新建play应用并启动</td>
+</tr>
+<tr>
+<td>clean,run</td>
+<td>base.py</td>
+<td>删除临时文件并运行</td>
+</tr>
+<tr>
+<td>modules</td>
+<td>base.py</td>
+<td>显示项目用到的模块，注：这里显示的模块只是在项目配置文件中引用的模块，命令参数中添加的模块不会显示</td>
+</tr>
+<tr>
+<td>check</td>
+<td>check.py</td>
+<td>检查play更新</td>
+</tr>
+<tr>
+<td>classpath、cp</td>
+<td>classpath.py</td>
+<td>显示应用的classpath</td>
+</tr>
+<tr>
+<td>start</td>
+<td>daemon.py</td>
+<td>在后台运行play程序</td>
+</tr>
+<tr>
+<td>stop</td>
+<td>daemon.py</td>
+<td>停止正在运行的程序</td>
+</tr>
+<tr>
+<td>restart</td>
+<td>daemon.py</td>
+<td>重启正在运行的程序</td>
+</tr>
+<tr>
+<td>pid</td>
+<td>daemon.py</td>
+<td>显示运行中的程序的pid</td>
+</tr>
+<tr>
+<td>out</td>
+<td>daemon.py</td>
+<td>显示输出</td>
+</tr>
+<tr>
+<td>dependencies、deps</td>
+<td>deps.py</td>
+<td>运行DependenciesManager更新依赖</td>
+</tr>
+<tr>
+<td>eclipsify、ec</td>
+<td>eclipse.py</td>
+<td>创建eclipse配置文件</td>
+</tr>
+<tr>
+<td>evolutions</td>
+<td>evolutions.py</td>
+<td>运行play.db.Evolutions进行数据库演变检查</td>
+</tr>
+<tr>
+<td>help</td>
+<td>help.py</td>
+<td>输出所有play的可用命令</td>
+</tr>
+<tr>
+<td>idealize、idea</td>
+<td>intellij.py</td>
+<td>生成idea配置文件</td>
+</tr>
+<tr>
+<td>javadoc</td>
+<td>javadoc.py</td>
+<td>生成javadoc</td>
+</tr>
+<tr>
+<td>new-module、nm</td>
+<td>modulesrepo.py</td>
+<td>创建新模块</td>
+</tr>
+<tr>
+<td>list-modules、lm</td>
+<td>modulesrepo.py</td>
+<td>显示play社区中的模块</td>
+</tr>
+<tr>
+<td>build-module、bm</td>
+<td>modulesrepo.py</td>
+<td>打包模块</td>
+</tr>
+<tr>
+<td>add</td>
+<td>modulesrepo.py</td>
+<td>将模块添加至项目</td>
+</tr>
+<tr>
+<td>install</td>
+<td>modulesrepo.py</td>
+<td>安装模块</td>
+</tr>
+<tr>
+<td>netbeansify</td>
+<td>netbeans.py</td>
+<td>生成netbeans配置文件</td>
+</tr>
+<tr>
+<td>precompile</td>
+<td>precompile.py</td>
+<td>预编译</td>
+</tr>
+<tr>
+<td>secret</td>
+<td>secret.py</td>
+<td>生成secret key</td>
+</tr>
+<tr>
+<td>status</td>
+<td>status.py</td>
+<td>显示运行中项目的状态</td>
+</tr>
+<tr>
+<td>version</td>
+<td>version.py</td>
+<td>显示play framework的版本号</td>
+</tr>
+<tr>
+<td>war</td>
+<td>war.py</td>
+<td>将项目打包为war文件</td>
+</tr>
+</tbody>
+</table>
+<h3 id="run与start">
+  run与start
+  <a class="heading-link" href="#run%e4%b8%8estart">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>run应该是我们平时用的最多的命令了，run命令的作用其实很简单，就是根据命令参数拼接java参数，然后调用java来运行play.server.Server，run函数的代码如下:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">def</span> <span style="color:#c0f">run</span>(app, args):
+</span></span><span style="display:flex;"><span>    <span style="color:#09f;font-style:italic">#app即为play脚本中创建的PlayApplication类</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">global</span> process
+</span></span><span style="display:flex;"><span>    <span style="color:#09f;font-style:italic">#这里检查是否存在conf/routes和conf/application.conf</span>
+</span></span><span style="display:flex;"><span>    app<span style="color:#555">.</span>check()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#366">print</span> <span style="color:#c30">&#34;~ Ctrl+C to stop&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#366">print</span> <span style="color:#c30">&#34;~ &#34;</span>
+</span></span><span style="display:flex;"><span>    java_cmd <span style="color:#555">=</span> app<span style="color:#555">.</span>java_cmd(args)
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">try</span>:
+</span></span><span style="display:flex;"><span>        process <span style="color:#555">=</span> subprocess<span style="color:#555">.</span>Popen (java_cmd, env<span style="color:#555">=</span>os<span style="color:#555">.</span>environ)
+</span></span><span style="display:flex;"><span>        signal<span style="color:#555">.</span>signal(signal<span style="color:#555">.</span>SIGTERM, handle_sigterm)
+</span></span><span style="display:flex;"><span>        return_code <span style="color:#555">=</span> process<span style="color:#555">.</span>wait()
+</span></span><span style="display:flex;"><span>    signal<span style="color:#555">.</span>signal(signal<span style="color:#555">.</span>SIGINT, handle_sigint)
+</span></span><span style="display:flex;"><span>        <span style="color:#069;font-weight:bold">if</span> <span style="color:#f60">0</span> <span style="color:#555">!=</span> return_code:
+</span></span><span style="display:flex;"><span>            sys<span style="color:#555">.</span>exit(return_code)
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">except</span> <span style="color:#c00;font-weight:bold">OSError</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#366">print</span> <span style="color:#c30">&#34;Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). &#34;</span>
+</span></span><span style="display:flex;"><span>        sys<span style="color:#555">.</span>exit(<span style="color:#555">-</span><span style="color:#f60">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#366">print</span>
+</span></span></code></pre></div><p>app.java_cmd(args)的实现代码如下：</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">def</span> <span style="color:#c0f">java_cmd</span>(self, java_args, cp_args<span style="color:#555">=</span><span style="color:#069;font-weight:bold">None</span>, className<span style="color:#555">=</span><span style="color:#c30">&#39;play.server.Server&#39;</span>, args <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">None</span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">if</span> args <span style="color:#000;font-weight:bold">is</span> <span style="color:#069;font-weight:bold">None</span>:
+</span></span><span style="display:flex;"><span>        args <span style="color:#555">=</span> [<span style="color:#c30">&#39;&#39;</span>]
+</span></span><span style="display:flex;"><span>    memory_in_args<span style="color:#555">=</span><span style="color:#069;font-weight:bold">False</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#09f;font-style:italic">#检查java参数中是否有jvm内存设置</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">for</span> arg <span style="color:#000;font-weight:bold">in</span> java_args:
+</span></span><span style="display:flex;"><span>        <span style="color:#069;font-weight:bold">if</span> arg<span style="color:#555">.</span>startswith(<span style="color:#c30">&#39;-Xm&#39;</span>):
+</span></span><span style="display:flex;"><span>            memory_in_args<span style="color:#555">=</span><span style="color:#069;font-weight:bold">True</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#09f;font-style:italic">#如果参数中无jvm内存设置，那么在配置文件中找是否有jvm内存设置，若还是没有则在环境变量中找是否有JAVA_OPTS</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#09f;font-style:italic">#这里其实有个问题，这里假定的是JAVA_OPTS变量里只存了jvm内存设置，如果JAVA_OPTS还存了其他选项，那对运行可能有影响</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">not</span> memory_in_args:
+</span></span><span style="display:flex;"><span>        memory <span style="color:#555">=</span> self<span style="color:#555">.</span>readConf(<span style="color:#c30">&#39;jvm.memory&#39;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#069;font-weight:bold">if</span> memory:
+</span></span><span style="display:flex;"><span>            java_args <span style="color:#555">=</span> java_args <span style="color:#555">+</span> memory<span style="color:#555">.</span>split(<span style="color:#c30">&#39; &#39;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#069;font-weight:bold">elif</span> <span style="color:#c30">&#39;JAVA_OPTS&#39;</span> <span style="color:#000;font-weight:bold">in</span> os<span style="color:#555">.</span>environ:
+</span></span><span style="display:flex;"><span>            java_args <span style="color:#555">=</span> java_args <span style="color:#555">+</span> os<span style="color:#555">.</span>environ[<span style="color:#c30">&#39;JAVA_OPTS&#39;</span>]<span style="color:#555">.</span>split(<span style="color:#c30">&#39; &#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#09f;font-style:italic">#获取程序的classpath</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">if</span> cp_args <span style="color:#000;font-weight:bold">is</span> <span style="color:#069;font-weight:bold">None</span>:
+</span></span><span style="display:flex;"><span>        cp_args <span style="color:#555">=</span> self<span style="color:#555">.</span>cp_args()
+</span></span><span style="display:flex;"><span>    <span style="color:#09f;font-style:italic">#读取配置文件中的jpda端口</span>
+</span></span><span style="display:flex;"><span>    self<span style="color:#555">.</span>jpda_port <span style="color:#555">=</span> self<span style="color:#555">.</span>readConf(<span style="color:#c30">&#39;jpda.port&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#09f;font-style:italic">#读取配置文件中的运行模式</span>
+</span></span><span style="display:flex;"><span>    application_mode <span style="color:#555">=</span> self<span style="color:#555">.</span>readConf(<span style="color:#c30">&#39;application.mode&#39;</span>)<span style="color:#555">.</span>lower()
+</span></span><span style="display:flex;"><span>    <span style="color:#09f;font-style:italic">#如果模式是prod，则用server模式编译</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">if</span> application_mode <span style="color:#555">==</span> <span style="color:#c30">&#39;prod&#39;</span>:
+</span></span><span style="display:flex;"><span>        java_args<span style="color:#555">.</span>append(<span style="color:#c30">&#39;-server&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#09f;font-style:italic"># JDK 7 compat</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#09f;font-style:italic"># 使用新class校验器 (不知道作用)</span>
+</span></span><span style="display:flex;"><span>    java_args<span style="color:#555">.</span>append(<span style="color:#c30">&#39;-XX:-UseSplitVerifier&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#09f;font-style:italic">#查找配置文件中是否有java安全配置，如果有则加入java参数中</span>
+</span></span><span style="display:flex;"><span>    java_policy <span style="color:#555">=</span> self<span style="color:#555">.</span>readConf(<span style="color:#c30">&#39;java.policy&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">if</span> java_policy <span style="color:#555">!=</span> <span style="color:#c30">&#39;&#39;</span>:
+</span></span><span style="display:flex;"><span>        policyFile <span style="color:#555">=</span> os<span style="color:#555">.</span>path<span style="color:#555">.</span>join(self<span style="color:#555">.</span>path, <span style="color:#c30">&#39;conf&#39;</span>, java_policy)
+</span></span><span style="display:flex;"><span>        <span style="color:#069;font-weight:bold">if</span> os<span style="color:#555">.</span>path<span style="color:#555">.</span>exists(policyFile):
+</span></span><span style="display:flex;"><span>            <span style="color:#366">print</span> <span style="color:#c30">&#34;~ using policy file </span><span style="color:#c30;font-weight:bold">\&#34;</span><span style="color:#a00">%s</span><span style="color:#c30;font-weight:bold">\&#34;</span><span style="color:#c30">&#34;</span> <span style="color:#555">%</span> policyFile
+</span></span><span style="display:flex;"><span>            java_args<span style="color:#555">.</span>append(<span style="color:#c30">&#39;-Djava.security.manager&#39;</span>)
+</span></span><span style="display:flex;"><span>            java_args<span style="color:#555">.</span>append(<span style="color:#c30">&#39;-Djava.security.policy==</span><span style="color:#a00">%s</span><span style="color:#c30">&#39;</span> <span style="color:#555">%</span> policyFile)
+</span></span><span style="display:flex;"><span>    <span style="color:#09f;font-style:italic">#加入http端口设置</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">if</span> self<span style="color:#555">.</span>play_env<span style="color:#555">.</span>has_key(<span style="color:#c30">&#39;http.port&#39;</span>):
+</span></span><span style="display:flex;"><span>        args <span style="color:#555">+=</span> [<span style="color:#c30">&#34;--http.port=</span><span style="color:#a00">%s</span><span style="color:#c30">&#34;</span> <span style="color:#555">%</span> self<span style="color:#555">.</span>play_env[<span style="color:#c30">&#39;http.port&#39;</span>]]
+</span></span><span style="display:flex;"><span>    <span style="color:#09f;font-style:italic">#加入https端口设置</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">if</span> self<span style="color:#555">.</span>play_env<span style="color:#555">.</span>has_key(<span style="color:#c30">&#39;https.port&#39;</span>):
+</span></span><span style="display:flex;"><span>        args <span style="color:#555">+=</span> [<span style="color:#c30">&#34;--https.port=</span><span style="color:#a00">%s</span><span style="color:#c30">&#34;</span> <span style="color:#555">%</span> self<span style="color:#555">.</span>play_env[<span style="color:#c30">&#39;https.port&#39;</span>]]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#09f;font-style:italic">#设置文件编码</span>
+</span></span><span style="display:flex;"><span>    java_args<span style="color:#555">.</span>append(<span style="color:#c30">&#39;-Dfile.encoding=utf-8&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#09f;font-style:italic">#设置编译命令 (这边使用了jregex/Pretokenizer类的next方法，不知道有什么用)</span>
+</span></span><span style="display:flex;"><span>    java_args<span style="color:#555">.</span>append(<span style="color:#c30">&#39;-XX:CompileCommand=exclude,jregex/Pretokenizer,next&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#09f;font-style:italic">#如果程序模式在dev，则添加jpda调试器参数</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">if</span> self<span style="color:#555">.</span>readConf(<span style="color:#c30">&#39;application.mode&#39;</span>)<span style="color:#555">.</span>lower() <span style="color:#555">==</span> <span style="color:#c30">&#39;dev&#39;</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#069;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">not</span> self<span style="color:#555">.</span>play_env[<span style="color:#c30">&#34;disable_check_jpda&#34;</span>]: self<span style="color:#555">.</span>check_jpda()
+</span></span><span style="display:flex;"><span>        java_args<span style="color:#555">.</span>append(<span style="color:#c30">&#39;-Xdebug&#39;</span>)
+</span></span><span style="display:flex;"><span>        java_args<span style="color:#555">.</span>append(<span style="color:#c30">&#39;-Xrunjdwp:transport=dt_socket,address=</span><span style="color:#a00">%s</span><span style="color:#c30">,server=y,suspend=n&#39;</span> <span style="color:#555">%</span> self<span style="color:#555">.</span>jpda_port)
+</span></span><span style="display:flex;"><span>        java_args<span style="color:#555">.</span>append(<span style="color:#c30">&#39;-Dplay.debug=yes&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#09f;font-style:italic">#拼接java参数</span>
+</span></span><span style="display:flex;"><span>    java_cmd <span style="color:#555">=</span> [self<span style="color:#555">.</span>java_path(), <span style="color:#c30">&#39;-javaagent:</span><span style="color:#a00">%s</span><span style="color:#c30">&#39;</span> <span style="color:#555">%</span> self<span style="color:#555">.</span>agent_path()] <span style="color:#555">+</span> java_args <span style="color:#555">+</span> [<span style="color:#c30">&#39;-classpath&#39;</span>, cp_args, <span style="color:#c30">&#39;-Dapplication.path=</span><span style="color:#a00">%s</span><span style="color:#c30">&#39;</span> <span style="color:#555">%</span> self<span style="color:#555">.</span>path, <span style="color:#c30">&#39;-Dplay.id=</span><span style="color:#a00">%s</span><span style="color:#c30">&#39;</span> <span style="color:#555">%</span> self<span style="color:#555">.</span>play_env[<span style="color:#c30">&#34;id&#34;</span>], className] <span style="color:#555">+</span> args
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">return</span> java_cmd
+</span></span></code></pre></div><p>start命令与run命令很类似，执行步骤为：</p>
+<ol>
+<li>依次查找play变量pid_file、系统环境变量PLAY_PID_PATH、项目根目录下server.pid，查找是否存在指定pid</li>
+<li>若第一步找到pid，查找当前进程列表中是否存在此pid进程，存在则试图关闭进程。(如果此时pid已经不是play的进程呢😅)</li>
+<li>在配置文件中找application.log.system.out看是否关闭了系统输出</li>
+<li>启动程序，这里与run命令唯一的区别就是他指定了stdout位置，这样就变成了后台程序</li>
+<li>将启动后的程序的pid写入server.pid</li>
+</ol>
+<p>stop命令即关闭当前进程，这里要提一下，play有个注解叫OnApplicationStop，即会在程序停止时触发，而OnApplicationStop的实现主要是调用了</p>
+<blockquote>
+<p>Runtime.getRuntime().addShutdownHook();</p>
+</blockquote>
+<p>来完成</p>
+<h3 id="test与autotest">
+  test与autotest
+  <a class="heading-link" href="#test%e4%b8%8eautotest">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>使用play test命令可以让程序进入测试模式，test命令和run命令其实差别不大，唯一的区别就在于使用test命令时，脚本会将play id自动替换为test，当play id为test时会自动引入testrunner模块，testrunner模块主要功能为添加@tests路由并实现了test测试页面，他的具体实现过程后续再谈。
+autotest命令的作用是自动测试所有的测试用例，他的执行顺序是这样的：</p>
+<ol>
+<li>检查是否存在tmp文件夹，存在即删除</li>
+<li>检查是否有程序正在运行，如存在则关闭程序</li>
+<li>检查程序是否配置了ssl但是没有指定证书</li>
+<li>检查是否存在test-result文件夹，存在即删除</li>
+<li>使用test作为id重启程序</li>
+<li>调用play.modules.testrunner.FirePhoque来进行自动化测试</li>
+<li>关闭程序</li>
+</ol>
+<p>autotest的脚本的步骤1和2我觉得是有问题的，应该换下顺序，不然如果程序正在向tmp文件夹插入临时文件，那么tmp文件夹就删除失败了。
+关闭程序的代码调用了<code>http://localhost:%http_port/@kill</code>进行关闭，@kill的实现方法在play.CorePlugin下，注意，@kill在prod模式下无效 (<del>这是废话</del>)<br>
+由于使用了python作为启动脚本，无法通过java内部变量值判断程序是否开启，只能查看控制台的输出日志，所以在使用test作为id重启后，脚本使用下面的代码判断程序是否完全启动：</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">try</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#09f;font-style:italic">#这里启动程序</span>
+</span></span><span style="display:flex;"><span>    play_process <span style="color:#555">=</span> subprocess<span style="color:#555">.</span>Popen(java_cmd, env<span style="color:#555">=</span>os<span style="color:#555">.</span>environ, stdout<span style="color:#555">=</span>sout)
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">except</span> <span style="color:#c00;font-weight:bold">OSError</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#366">print</span> <span style="color:#c30">&#34;Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). &#34;</span>
+</span></span><span style="display:flex;"><span>        sys<span style="color:#555">.</span>exit(<span style="color:#555">-</span><span style="color:#f60">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#09f;font-style:italic">#打开日志输出文件</span>
+</span></span><span style="display:flex;"><span>    soutint <span style="color:#555">=</span> <span style="color:#366">open</span>(os<span style="color:#555">.</span>path<span style="color:#555">.</span>join(app<span style="color:#555">.</span>log_path(), <span style="color:#c30">&#39;system.out&#39;</span>), <span style="color:#c30">&#39;r&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">while</span> <span style="color:#069;font-weight:bold">True</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#069;font-weight:bold">if</span> play_process<span style="color:#555">.</span>poll():
+</span></span><span style="display:flex;"><span>            <span style="color:#366">print</span> <span style="color:#c30">&#34;~&#34;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#366">print</span> <span style="color:#c30">&#34;~ Oops, application has not started?&#34;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#366">print</span> <span style="color:#c30">&#34;~&#34;</span>
+</span></span><span style="display:flex;"><span>            sys<span style="color:#555">.</span>exit(<span style="color:#555">-</span><span style="color:#f60">1</span>)
+</span></span><span style="display:flex;"><span>        line <span style="color:#555">=</span> soutint<span style="color:#555">.</span>readline()<span style="color:#555">.</span>strip()
+</span></span><span style="display:flex;"><span>        <span style="color:#069;font-weight:bold">if</span> line:
+</span></span><span style="display:flex;"><span>            <span style="color:#366">print</span> line
+</span></span><span style="display:flex;"><span>            <span style="color:#09f;font-style:italic">#若出现&#39;Server is up and running&#39;则正常启动</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#069;font-weight:bold">if</span> line<span style="color:#555">.</span>find(<span style="color:#c30">&#39;Server is up and running&#39;</span>) <span style="color:#555">&gt;</span> <span style="color:#555">-</span><span style="color:#f60">1</span>: <span style="color:#09f;font-style:italic"># This line is written out by Server.java to system.out and is not log file dependent</span>
+</span></span><span style="display:flex;"><span>                soutint<span style="color:#555">.</span>close()
+</span></span><span style="display:flex;"><span>                <span style="color:#069;font-weight:bold">break</span>
+</span></span></code></pre></div><p>FirePhoque类的实现过程我们之后再详解。</p>
+<h3 id="new与clean">
+  new与clean
+  <a class="heading-link" href="#new%e4%b8%8eclean">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>我们使用new来创建一个新项目，play new的使用方法为<code>play new project-name [--with] [--name]</code>。
+with参数为项目所使用的模块。
+name为项目名，这里要注意一点，project-name和&ndash;name的参数可以设置为不同值，project-name是项目建立的文件夹名，&ndash;name的值为项目配置文件中的application.name。<br>
+如果不加&ndash;name，脚本会提示你是否使用project-name作为名字，在确认之后，脚本会将resources/application-skel中的所有文件拷贝到{project-name}文件夹下，然后用输入的name替换项目配置文件下的application.name，并生成一个64位的secretKey替换配置文件中的secretKey。<br>
+接着，脚本会查找使用的模块中是否存在dependencies.yml，并将dependencies.yml中的内容加入项目的dependencies.yml中，并调用DependenciesManager检查依赖状态。</p>
+<p>new函数的主要代码如下:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#366">print</span> <span style="color:#c30">&#34;~ The new application will be created in </span><span style="color:#a00">%s</span><span style="color:#c30">&#34;</span> <span style="color:#555">%</span> os<span style="color:#555">.</span>path<span style="color:#555">.</span>normpath(app<span style="color:#555">.</span>path)
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">if</span> application_name <span style="color:#000;font-weight:bold">is</span> <span style="color:#069;font-weight:bold">None</span>:
+</span></span><span style="display:flex;"><span>    application_name <span style="color:#555">=</span> raw_input(<span style="color:#c30">&#34;~ What is the application name? [</span><span style="color:#a00">%s</span><span style="color:#c30">] &#34;</span> <span style="color:#555">%</span> os<span style="color:#555">.</span>path<span style="color:#555">.</span>basename(app<span style="color:#555">.</span>path))
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">if</span> application_name <span style="color:#555">==</span> <span style="color:#c30">&#34;&#34;</span>:
+</span></span><span style="display:flex;"><span>    application_name <span style="color:#555">=</span> os<span style="color:#555">.</span>path<span style="color:#555">.</span>basename(app<span style="color:#555">.</span>path)
+</span></span><span style="display:flex;"><span>copy_directory(os<span style="color:#555">.</span>path<span style="color:#555">.</span>join(env[<span style="color:#c30">&#34;basedir&#34;</span>], <span style="color:#c30">&#39;resources/application-skel&#39;</span>), app<span style="color:#555">.</span>path)
+</span></span><span style="display:flex;"><span>os<span style="color:#555">.</span>mkdir(os<span style="color:#555">.</span>path<span style="color:#555">.</span>join(app<span style="color:#555">.</span>path, <span style="color:#c30">&#39;app/models&#39;</span>))
+</span></span><span style="display:flex;"><span>os<span style="color:#555">.</span>mkdir(os<span style="color:#555">.</span>path<span style="color:#555">.</span>join(app<span style="color:#555">.</span>path, <span style="color:#c30">&#39;lib&#39;</span>))
+</span></span><span style="display:flex;"><span>app<span style="color:#555">.</span>check()
+</span></span><span style="display:flex;"><span>replaceAll(os<span style="color:#555">.</span>path<span style="color:#555">.</span>join(app<span style="color:#555">.</span>path, <span style="color:#c30">&#39;conf/application.conf&#39;</span>), <span style="color:#c30">r</span><span style="color:#c30">&#39;%APPLICATION_NAME%&#39;</span>, application_name)
+</span></span><span style="display:flex;"><span>replaceAll(os<span style="color:#555">.</span>path<span style="color:#555">.</span>join(app<span style="color:#555">.</span>path, <span style="color:#c30">&#39;conf/application.conf&#39;</span>), <span style="color:#c30">r</span><span style="color:#c30">&#39;%SECRET_KEY%&#39;</span>, secretKey())
+</span></span><span style="display:flex;"><span><span style="color:#366">print</span> <span style="color:#c30">&#34;~&#34;</span>
+</span></span></code></pre></div><p>clean命令非常简单，就是删除整个tmp文件夹</p>
+<h3 id="war与precompile">
+  war与precompile
+  <a class="heading-link" href="#war%e4%b8%8eprecompile">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>很多时候，我们需要使用tomcat等服务器容器作为服务载体，这时候就需要将play应用打包为war<br>
+war的使用参数是</p>
+<blockquote>
+<p>play war project-name [-o/&ndash;output][filename] [&ndash;zip] [&ndash;exclude][exclude-directories]</p>
+</blockquote>
+<p>使用-o或&ndash;output来指定输出文件夹，使用&ndash;zip压缩为war格式，使用&ndash;exclude来包含另外需要打包的文件夹<br>
+要注意的是，必须在项目目录外进行操作，不然会失败</p>
+<p>在参数处理完毕后，脚本正式开始打包过程，分为2个步骤：1.预编译。2：打包</p>
+<p>预编译即用到了precompile命令，precompile命令与run命令几乎一样，只是在java参数中加入了<code>precompile=yes</code><br>
+让我们来看一下加入了这个java参数对程序的影响。
+与预编译有关的代码主要是下面2段：</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">static</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">boolean</span><span style="color:#bbb"> </span><span style="color:#c0f">preCompile</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(usePrecompiled)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(Play.<span style="color:#309">getFile</span>(<span style="color:#c30">&#34;precompiled&#34;</span>).<span style="color:#309">exists</span>())<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>classloader.<span style="color:#309">getAllClasses</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>Logger.<span style="color:#309">info</span>(<span style="color:#c30">&#34;Application is precompiled&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">true</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Logger.<span style="color:#309">error</span>(<span style="color:#c30">&#34;Precompiled classes are missing!!&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>fatalServerErrorOccurred();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">false</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//这里开始预编译</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">try</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Logger.<span style="color:#309">info</span>(<span style="color:#c30">&#34;Precompiling ...&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Thread.<span style="color:#309">currentThread</span>().<span style="color:#309">setContextClassLoader</span>(Play.<span style="color:#309">classloader</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#078;font-weight:bold">long</span><span style="color:#bbb"> </span>start<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>System.<span style="color:#309">currentTimeMillis</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">//getAllClasses方法较长，就不贴了，下面一段代码在getAllClasses方法中进入</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>classloader.<span style="color:#309">getAllClasses</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(Logger.<span style="color:#309">isTraceEnabled</span>())<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>Logger.<span style="color:#309">trace</span>(<span style="color:#c30">&#34;%sms to precompile the Java stuff&#34;</span>,<span style="color:#bbb"> </span>System.<span style="color:#309">currentTimeMillis</span>()<span style="color:#bbb"> </span><span style="color:#555">-</span><span style="color:#bbb"> </span>start);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(<span style="color:#555">!</span>lazyLoadTemplates)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>start<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>System.<span style="color:#309">currentTimeMillis</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#09f;font-style:italic">//编译模板</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>TemplateLoader.<span style="color:#309">getAllTemplate</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(Logger.<span style="color:#309">isTraceEnabled</span>())<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>Logger.<span style="color:#309">trace</span>(<span style="color:#c30">&#34;%sms to precompile the templates&#34;</span>,<span style="color:#bbb"> </span>System.<span style="color:#309">currentTimeMillis</span>()<span style="color:#bbb"> </span><span style="color:#555">-</span><span style="color:#bbb"> </span>start);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">true</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(Throwable<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Logger.<span style="color:#309">error</span>(e,<span style="color:#bbb"> </span><span style="color:#c30">&#34;Cannot start in PROD mode with errors&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>fatalServerErrorOccurred();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">false</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">byte</span><span style="color:#555">[]</span><span style="color:#bbb"> </span><span style="color:#c0f">enhance</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">enhancedByteCode</span><span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">javaByteCode</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(isClass())<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">// before we can start enhancing this class we must make sure it is not a PlayPlugin.</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">// PlayPlugins can be included as regular java files in a Play-application.</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">// If a PlayPlugin is present in the application, it is loaded when other plugins are loaded.</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">// All plugins must be loaded before we can start enhancing.</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">// This is a problem when loading PlayPlugins bundled as regular app-class since it uses the same classloader</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">// as the other (soon to be) enhanched play-app-classes.</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#078;font-weight:bold">boolean</span><span style="color:#bbb"> </span>shouldEnhance<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">true</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">try</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>CtClass<span style="color:#bbb"> </span>ctClass<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>enhanceChecker_classPool.<span style="color:#309">makeClass</span>(<span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>ByteArrayInputStream(<span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">enhancedByteCode</span>));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(ctClass.<span style="color:#309">subclassOf</span>(ctPlayPluginClass))<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>shouldEnhance<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">false</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span>(<span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#09f;font-style:italic">// nop</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(shouldEnhance)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>Play.<span style="color:#309">pluginCollection</span>.<span style="color:#309">enhance</span>(<span style="color:#069;font-weight:bold">this</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//主要是这一段，他将增强处理后的字节码写入了文件，增强处理在之后会深入展开</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(System.<span style="color:#309">getProperty</span>(<span style="color:#c30">&#34;precompile&#34;</span>)<span style="color:#bbb"> </span><span style="color:#555">!=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">try</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#09f;font-style:italic">// emit bytecode to standard class layout as well</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>File<span style="color:#bbb"> </span>f<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>Play.<span style="color:#309">getFile</span>(<span style="color:#c30">&#34;precompiled/java/&#34;</span><span style="color:#bbb"> </span><span style="color:#555">+</span><span style="color:#bbb"> </span>(name.<span style="color:#309">replace</span>(<span style="color:#c30">&#34;.&#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;/&#34;</span>))<span style="color:#bbb"> </span><span style="color:#555">+</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;.class&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>f.<span style="color:#309">getParentFile</span>().<span style="color:#309">mkdirs</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>FileOutputStream<span style="color:#bbb"> </span>fos<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>FileOutputStream(f);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>fos.<span style="color:#309">write</span>(<span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">enhancedByteCode</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>fos.<span style="color:#309">close</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(Exception<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>e.<span style="color:#309">printStackTrace</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">enhancedByteCode</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>预编译过程结束后，脚本正式开始打包过程，打包过程比较简单，就是讲预编译后的字节码文件、模板文件、配置文件、使用的类库、使用的模块类库等移动至WEB-INF文件夹中，如果使用了&ndash;zip，那么脚本会将生成的文件夹用zip格式打包。</p>
+<h3 id="secret和status">
+  secret和status
+  <a class="heading-link" href="#secret%e5%92%8cstatus">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>secret命令能生成一个新的secret key
+status命令是用于实时显示程序的运行状态，脚本的运作十分简单，步骤如下：</p>
+<ol>
+<li>检查是否有&ndash;url参数，有则在他之后添加@status</li>
+<li>检查是否存在&ndash;secret</li>
+<li>如果没有&ndash;url，则使用<code>http://localhost:%http_port/@status</code>;如果没有 &ndash;secret，则从配置文件中读取secret key</li>
+<li>将secret_key、&rsquo;@status&rsquo;使用sha加密，并加入Authorization请求头</li>
+<li>发送请求</li>
+</ol>
+<p>@status的实现和@kill一样在CorePlugin类中，这在之后再进行详解。</p>
+<h1 id="总结">
+  总结
+  <a class="heading-link" href="#%e6%80%bb%e7%bb%93">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>Play的启动脚本分析至此就结束了，从脚本的分析过程中我们可以稍微探究下Play在脚本启动阶段有何行为，这对我们进行脚本改造或者启动优化还是非常有帮助的。
+下一篇，我们来看看Play的启动类是如何运作的。。</p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+        
+        
+
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2024
+    
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.js"></script>
+  
+
+  
+
+  
+
+
+  
+  
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

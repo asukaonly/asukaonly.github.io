@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Play framework源码解析 Part2:Server与ServletWrapper · 404 NOT FOUND
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="description" content="在上一节中我们剖析了Play framework的启动原理，很容易就能发现Play framework的启动主入口在play.server.Server中，在本节，我们来一起看看Server类中主要发生了什么。
+Server类 Link to heading 既然是程序运行的主入口，那么必然是由main方法进入的，Server类中的main方法十分简单。源码如下:
+public static void main(String[] args) throws Exception { File root = new File(System.getProperty(&#34;application.path&#34;)); //获取参数中的precompiled if (System.getProperty(&#34;precompiled&#34;, &#34;false&#34;).equals(&#34;true&#34;)) { Play.usePrecompiled = true; } //获取参数中的writepid if (System.getProperty(&#34;writepid&#34;, &#34;false&#34;).equals(&#34;true&#34;)) { //这个方法的作用是检查当前目录下是否存在server.pid文件，若存在表明当前已有程序在运行 writePID(root); } //Play类的初始化 Play.init(root, System.getProperty(&#34;play.id&#34;, &#34;&#34;)); if (System.getProperty(&#34;precompile&#34;) == null) { //Server类初始化 new Server(args); } else { Logger.info(&#34;Done.&#34;); } } main方法执行的操作很简单:
+获取程序路径 检查是否存在precompiled参数 检查是否存在writepid参数，若存在则检查是否存在server.pid文件，若存在则表明已有程序在运行，不存在则将当前程序pid写入server.pid play类初始化 检查是否存在precompile参数项，若存在表示是个预编译行为，结束运行，若没有则启动服务 这其中最重要的便是Play类的初始化以及Server类的初始化 这里我们先来看Server类的初始化过程，现在可以先简单的将Play类的初始化理解为Play框架中一些常量的初始化以及日志、配置文件、路由信息等配置的读取。 这里贴一下Server类的初始化过程：
+public Server(String[] args) { //设置文件编码为UTF-8 System.">
+<meta name="keywords" content="blog,developer,personal,">
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Play framework源码解析 Part2:Server与ServletWrapper">
+  <meta name="twitter:description" content="在上一节中我们剖析了Play framework的启动原理，很容易就能发现Play framework的启动主入口在play.server.Server中，在本节，我们来一起看看Server类中主要发生了什么。
+Server类 Link to heading 既然是程序运行的主入口，那么必然是由main方法进入的，Server类中的main方法十分简单。源码如下:
+public static void main(String[] args) throws Exception { File root = new File(System.getProperty(&#34;application.path&#34;)); //获取参数中的precompiled if (System.getProperty(&#34;precompiled&#34;, &#34;false&#34;).equals(&#34;true&#34;)) { Play.usePrecompiled = true; } //获取参数中的writepid if (System.getProperty(&#34;writepid&#34;, &#34;false&#34;).equals(&#34;true&#34;)) { //这个方法的作用是检查当前目录下是否存在server.pid文件，若存在表明当前已有程序在运行 writePID(root); } //Play类的初始化 Play.init(root, System.getProperty(&#34;play.id&#34;, &#34;&#34;)); if (System.getProperty(&#34;precompile&#34;) == null) { //Server类初始化 new Server(args); } else { Logger.info(&#34;Done.&#34;); } } main方法执行的操作很简单:
+获取程序路径 检查是否存在precompiled参数 检查是否存在writepid参数，若存在则检查是否存在server.pid文件，若存在则表明已有程序在运行，不存在则将当前程序pid写入server.pid play类初始化 检查是否存在precompile参数项，若存在表示是个预编译行为，结束运行，若没有则启动服务 这其中最重要的便是Play类的初始化以及Server类的初始化 这里我们先来看Server类的初始化过程，现在可以先简单的将Play类的初始化理解为Play框架中一些常量的初始化以及日志、配置文件、路由信息等配置的读取。 这里贴一下Server类的初始化过程：
+public Server(String[] args) { //设置文件编码为UTF-8 System.">
+
+<meta property="og:url" content="https://asukaonly.github.io/posts/play-framework/part2server%E4%B8%8Eservletwrapper/">
+  <meta property="og:site_name" content="404 NOT FOUND">
+  <meta property="og:title" content="Play framework源码解析 Part2:Server与ServletWrapper">
+  <meta property="og:description" content="在上一节中我们剖析了Play framework的启动原理，很容易就能发现Play framework的启动主入口在play.server.Server中，在本节，我们来一起看看Server类中主要发生了什么。
+Server类 Link to heading 既然是程序运行的主入口，那么必然是由main方法进入的，Server类中的main方法十分简单。源码如下:
+public static void main(String[] args) throws Exception { File root = new File(System.getProperty(&#34;application.path&#34;)); //获取参数中的precompiled if (System.getProperty(&#34;precompiled&#34;, &#34;false&#34;).equals(&#34;true&#34;)) { Play.usePrecompiled = true; } //获取参数中的writepid if (System.getProperty(&#34;writepid&#34;, &#34;false&#34;).equals(&#34;true&#34;)) { //这个方法的作用是检查当前目录下是否存在server.pid文件，若存在表明当前已有程序在运行 writePID(root); } //Play类的初始化 Play.init(root, System.getProperty(&#34;play.id&#34;, &#34;&#34;)); if (System.getProperty(&#34;precompile&#34;) == null) { //Server类初始化 new Server(args); } else { Logger.info(&#34;Done.&#34;); } } main方法执行的操作很简单:
+获取程序路径 检查是否存在precompiled参数 检查是否存在writepid参数，若存在则检查是否存在server.pid文件，若存在则表明已有程序在运行，不存在则将当前程序pid写入server.pid play类初始化 检查是否存在precompile参数项，若存在表示是个预编译行为，结束运行，若没有则启动服务 这其中最重要的便是Play类的初始化以及Server类的初始化 这里我们先来看Server类的初始化过程，现在可以先简单的将Play类的初始化理解为Play框架中一些常量的初始化以及日志、配置文件、路由信息等配置的读取。 这里贴一下Server类的初始化过程：
+public Server(String[] args) { //设置文件编码为UTF-8 System.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2018-01-11T15:16:54+00:00">
+    <meta property="article:modified_time" content="2018-01-11T15:16:54+00:00">
+    <meta property="article:tag" content="Program">
+    <meta property="article:tag" content="Backend">
+
+
+
+
+<link rel="canonical" href="https://asukaonly.github.io/posts/play-framework/part2server%E4%B8%8Eservletwrapper/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.38c4552ac40f9ae3408bad40358f654ebd8804412fe74ed56f2d6c8a7af82dd3.css" integrity="sha256-OMRVKsQPmuNAi61ANY9lTr2IBEEv507Vby1sinr4LdM=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+<body class="preload-transitions colorscheme-light">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="https://asukaonly.github.io/">
+      404 NOT FOUND
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/posts/">Blog</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://asukaonly.github.io/posts/play-framework/part2server%E4%B8%8Eservletwrapper/">
+              Play framework源码解析 Part2:Server与ServletWrapper
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2018-01-11T15:16:54Z">
+                January 11, 2018
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              9-minute read
+            </span>
+          </div>
+          
+          <div class="categories">
+  <i class="fa-solid fa-folder" aria-hidden="true"></i>
+    <a href="/categories/program/">Program</a></div>
+
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="/tags/program/">Program</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/backend/">Backend</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p>在上一节中我们剖析了Play framework的启动原理，很容易就能发现Play framework的启动主入口在play.server.Server中，在本节，我们来一起看看Server类中主要发生了什么。</p>
+<h1 id="server类">
+  Server类
+  <a class="heading-link" href="#server%e7%b1%bb">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>既然是程序运行的主入口，那么必然是由main方法进入的，Server类中的main方法十分简单。源码如下:</p>
+<!-- more -->
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">static</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">main</span>(String<span style="color:#555">[]</span><span style="color:#bbb"> </span>args)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>File<span style="color:#bbb"> </span>root<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>File(System.<span style="color:#309">getProperty</span>(<span style="color:#c30">&#34;application.path&#34;</span>));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//获取参数中的precompiled</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(System.<span style="color:#309">getProperty</span>(<span style="color:#c30">&#34;precompiled&#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;false&#34;</span>).<span style="color:#309">equals</span>(<span style="color:#c30">&#34;true&#34;</span>))<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Play.<span style="color:#309">usePrecompiled</span><span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">true</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//获取参数中的writepid</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(System.<span style="color:#309">getProperty</span>(<span style="color:#c30">&#34;writepid&#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;false&#34;</span>).<span style="color:#309">equals</span>(<span style="color:#c30">&#34;true&#34;</span>))<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">//这个方法的作用是检查当前目录下是否存在server.pid文件，若存在表明当前已有程序在运行</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>writePID(root);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//Play类的初始化</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>Play.<span style="color:#309">init</span>(root,<span style="color:#bbb"> </span>System.<span style="color:#309">getProperty</span>(<span style="color:#c30">&#34;play.id&#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;&#34;</span>));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(System.<span style="color:#309">getProperty</span>(<span style="color:#c30">&#34;precompile&#34;</span>)<span style="color:#bbb"> </span><span style="color:#555">==</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">//Server类初始化</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>Server(args);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">else</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Logger.<span style="color:#309">info</span>(<span style="color:#c30">&#34;Done.&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>main方法执行的操作很简单:</p>
+<ol>
+<li>获取程序路径</li>
+<li>检查是否存在precompiled参数</li>
+<li>检查是否存在writepid参数，若存在则检查是否存在server.pid文件，若存在则表明已有程序在运行，不存在则将当前程序pid写入server.pid</li>
+<li>play类初始化</li>
+<li>检查是否存在precompile参数项，若存在表示是个预编译行为，结束运行，若没有则启动服务</li>
+</ol>
+<p>这其中最重要的便是Play类的初始化以及Server类的初始化
+这里我们先来看Server类的初始化过程，现在可以先简单的将Play类的初始化理解为Play框架中一些常量的初始化以及日志、配置文件、路由信息等配置的读取。
+这里贴一下Server类的初始化过程：</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#c0f">Server</span>(String<span style="color:#555">[]</span><span style="color:#bbb"> </span>args)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//设置文件编码为UTF-8</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>System.<span style="color:#309">setProperty</span>(<span style="color:#c30">&#34;file.encoding&#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;utf-8&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//p为Play类初始化过程中读取的配置文件信息</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>Properties<span style="color:#bbb"> </span>p<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>Play.<span style="color:#309">configuration</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//获取参数中的http与https端口信息，若不存在则用配置文件中的http与https端口信息</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>httpPort<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>Integer.<span style="color:#309">parseInt</span>(getOpt(args,<span style="color:#bbb"> </span><span style="color:#c30">&#34;http.port&#34;</span>,<span style="color:#bbb"> </span>p.<span style="color:#309">getProperty</span>(<span style="color:#c30">&#34;http.port&#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;-1&#34;</span>)));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>httpsPort<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>Integer.<span style="color:#309">parseInt</span>(getOpt(args,<span style="color:#bbb"> </span><span style="color:#c30">&#34;https.port&#34;</span>,<span style="color:#bbb"> </span>p.<span style="color:#309">getProperty</span>(<span style="color:#c30">&#34;https.port&#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;-1&#34;</span>)));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//若没有配置则设置默认端口为9000</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(httpPort<span style="color:#bbb"> </span><span style="color:#555">==</span><span style="color:#bbb"> </span><span style="color:#555">-</span>1<span style="color:#bbb"> </span><span style="color:#555">&amp;&amp;</span><span style="color:#bbb"> </span>httpsPort<span style="color:#bbb"> </span><span style="color:#555">==</span><span style="color:#bbb"> </span><span style="color:#555">-</span>1)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>httpPort<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>9000;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//http与https端口不能相同</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(httpPort<span style="color:#bbb"> </span><span style="color:#555">==</span><span style="color:#bbb"> </span>httpsPort)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Logger.<span style="color:#309">error</span>(<span style="color:#c30">&#34;Could not bind on https and http on the same port &#34;</span><span style="color:#bbb"> </span><span style="color:#555">+</span><span style="color:#bbb"> </span>httpPort);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Play.<span style="color:#309">fatalServerErrorOccurred</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>InetAddress<span style="color:#bbb"> </span>address<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>InetAddress<span style="color:#bbb"> </span>secureAddress<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">try</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">//获取配置文件中的默认http地址，若不存在则在系统参数中查找</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">//之前还是参数配置大于配置文件，这里不知道为什么又变成了配置文件的优先级高于参数配置，很迷</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(p.<span style="color:#309">getProperty</span>(<span style="color:#c30">&#34;http.address&#34;</span>)<span style="color:#bbb"> </span><span style="color:#555">!=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>address<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>InetAddress.<span style="color:#309">getByName</span>(p.<span style="color:#309">getProperty</span>(<span style="color:#c30">&#34;http.address&#34;</span>));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">else</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(System.<span style="color:#309">getProperties</span>().<span style="color:#309">containsKey</span>(<span style="color:#c30">&#34;http.address&#34;</span>))<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>address<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>InetAddress.<span style="color:#309">getByName</span>(System.<span style="color:#309">getProperty</span>(<span style="color:#c30">&#34;http.address&#34;</span>));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(Exception<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Logger.<span style="color:#309">error</span>(e,<span style="color:#bbb"> </span><span style="color:#c30">&#34;Could not understand http.address&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Play.<span style="color:#309">fatalServerErrorOccurred</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">try</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">//同上，获取https地址</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(p.<span style="color:#309">getProperty</span>(<span style="color:#c30">&#34;https.address&#34;</span>)<span style="color:#bbb"> </span><span style="color:#555">!=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>secureAddress<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>InetAddress.<span style="color:#309">getByName</span>(p.<span style="color:#309">getProperty</span>(<span style="color:#c30">&#34;https.address&#34;</span>));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">else</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(System.<span style="color:#309">getProperties</span>().<span style="color:#309">containsKey</span>(<span style="color:#c30">&#34;https.address&#34;</span>))<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>secureAddress<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>InetAddress.<span style="color:#309">getByName</span>(System.<span style="color:#309">getProperty</span>(<span style="color:#c30">&#34;https.address&#34;</span>));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(Exception<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Logger.<span style="color:#309">error</span>(e,<span style="color:#bbb"> </span><span style="color:#c30">&#34;Could not understand https.address&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Play.<span style="color:#309">fatalServerErrorOccurred</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//netty服务器启动类初始化，使用nio服务器，无限制线程池</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//这里的线程池是netty的主线程池与工作线程池，是处理连接的线程池，而Play实际执行业务操作的线程池在另一个地方配置</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>ServerBootstrap<span style="color:#bbb"> </span>bootstrap<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>ServerBootstrap(<span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>NioServerSocketChannelFactory(<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>Executors.<span style="color:#309">newCachedThreadPool</span>(),<span style="color:#bbb"> </span>Executors.<span style="color:#309">newCachedThreadPool</span>())<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">try</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">//初始化http端口</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(httpPort<span style="color:#bbb"> </span><span style="color:#555">!=</span><span style="color:#bbb"> </span><span style="color:#555">-</span>1)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#09f;font-style:italic">//设置管道工厂类</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>bootstrap.<span style="color:#309">setPipelineFactory</span>(<span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>HttpServerPipelineFactory());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#09f;font-style:italic">//绑定端口</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>bootstrap.<span style="color:#309">bind</span>(<span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>InetSocketAddress(address,<span style="color:#bbb"> </span>httpPort));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>bootstrap.<span style="color:#309">setOption</span>(<span style="color:#c30">&#34;child.tcpNoDelay&#34;</span>,<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">true</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(Play.<span style="color:#309">mode</span><span style="color:#bbb"> </span><span style="color:#555">==</span><span style="color:#bbb"> </span>Mode.<span style="color:#309">DEV</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(address<span style="color:#bbb"> </span><span style="color:#555">==</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                    </span>Logger.<span style="color:#309">info</span>(<span style="color:#c30">&#34;Listening for HTTP on port %s (Waiting a first request to start) ...&#34;</span>,<span style="color:#bbb"> </span>httpPort);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">else</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                    </span>Logger.<span style="color:#309">info</span>(<span style="color:#c30">&#34;Listening for HTTP at %2$s:%1$s (Waiting a first request to start) ...&#34;</span>,<span style="color:#bbb"> </span>httpPort,<span style="color:#bbb"> </span>address);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">else</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(address<span style="color:#bbb"> </span><span style="color:#555">==</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                    </span>Logger.<span style="color:#309">info</span>(<span style="color:#c30">&#34;Listening for HTTP on port %s ...&#34;</span>,<span style="color:#bbb"> </span>httpPort);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">else</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                    </span>Logger.<span style="color:#309">info</span>(<span style="color:#c30">&#34;Listening for HTTP at %2$s:%1$s  ...&#34;</span>,<span style="color:#bbb"> </span>httpPort,<span style="color:#bbb"> </span>address);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(ChannelException<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Logger.<span style="color:#309">error</span>(<span style="color:#c30">&#34;Could not bind on port &#34;</span><span style="color:#bbb"> </span><span style="color:#555">+</span><span style="color:#bbb"> </span>httpPort,<span style="color:#bbb"> </span>e);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Play.<span style="color:#309">fatalServerErrorOccurred</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//下面是https端口服务器的启动过程，和http一致</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>bootstrap<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>ServerBootstrap(<span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>NioServerSocketChannelFactory(<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>Executors.<span style="color:#309">newCachedThreadPool</span>(),<span style="color:#bbb"> </span>Executors.<span style="color:#309">newCachedThreadPool</span>())<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">try</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(httpsPort<span style="color:#bbb"> </span><span style="color:#555">!=</span><span style="color:#bbb"> </span><span style="color:#555">-</span>1)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#09f;font-style:italic">//这里的管道工厂类变成了SslHttpServerPipelineFactory</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>bootstrap.<span style="color:#309">setPipelineFactory</span>(<span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>SslHttpServerPipelineFactory());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>bootstrap.<span style="color:#309">bind</span>(<span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>InetSocketAddress(secureAddress,<span style="color:#bbb"> </span>httpsPort));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>bootstrap.<span style="color:#309">setOption</span>(<span style="color:#c30">&#34;child.tcpNoDelay&#34;</span>,<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">true</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(Play.<span style="color:#309">mode</span><span style="color:#bbb"> </span><span style="color:#555">==</span><span style="color:#bbb"> </span>Mode.<span style="color:#309">DEV</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(secureAddress<span style="color:#bbb"> </span><span style="color:#555">==</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                    </span>Logger.<span style="color:#309">info</span>(<span style="color:#c30">&#34;Listening for HTTPS on port %s (Waiting a first request to start) ...&#34;</span>,<span style="color:#bbb"> </span>httpsPort);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">else</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                    </span>Logger.<span style="color:#309">info</span>(<span style="color:#c30">&#34;Listening for HTTPS at %2$s:%1$s (Waiting a first request to start) ...&#34;</span>,<span style="color:#bbb"> </span>httpsPort,<span style="color:#bbb"> </span>secureAddress);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">else</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(secureAddress<span style="color:#bbb"> </span><span style="color:#555">==</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                    </span>Logger.<span style="color:#309">info</span>(<span style="color:#c30">&#34;Listening for HTTPS on port %s ...&#34;</span>,<span style="color:#bbb"> </span>httpsPort);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">else</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                    </span>Logger.<span style="color:#309">info</span>(<span style="color:#c30">&#34;Listening for HTTPS at %2$s:%1$s  ...&#34;</span>,<span style="color:#bbb"> </span>httpsPort,<span style="color:#bbb"> </span>secureAddress);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(ChannelException<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Logger.<span style="color:#309">error</span>(<span style="color:#c30">&#34;Could not bind on port &#34;</span><span style="color:#bbb"> </span><span style="color:#555">+</span><span style="color:#bbb"> </span>httpsPort,<span style="color:#bbb"> </span>e);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Play.<span style="color:#309">fatalServerErrorOccurred</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(Play.<span style="color:#309">mode</span><span style="color:#bbb"> </span><span style="color:#555">==</span><span style="color:#bbb"> </span>Mode.<span style="color:#309">DEV</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">// print this line to STDOUT - not using logger, so auto test runner will not block if logger is misconfigured (see #1222)</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">//输出启动成功，以便进行自动化测试</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>System.<span style="color:#309">out</span>.<span style="color:#309">println</span>(<span style="color:#c30">&#34;~ Server is up and running&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>server类的初始化没什么好说的，重点就在于那2个管道工厂类，HttpServerPipelineFactory与SslHttpServerPipelineFactory</p>
+<h2 id="httpserverpipelinefactory">
+  HttpServerPipelineFactory
+  <a class="heading-link" href="#httpserverpipelinefactory">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>HttpServerPipelineFactory类作用就是为netty服务器增加了各个ChannelHandler。</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">HttpServerPipelineFactory</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">implements</span><span style="color:#bbb"> </span>ChannelPipelineFactory<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>ChannelPipeline<span style="color:#bbb"> </span><span style="color:#c0f">getPipeline</span>()<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Integer<span style="color:#bbb"> </span>max<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>Integer.<span style="color:#309">valueOf</span>(Play.<span style="color:#309">configuration</span>.<span style="color:#309">getProperty</span>(<span style="color:#c30">&#34;play.netty.maxContentLength&#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;-1&#34;</span>));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>ChannelPipeline<span style="color:#bbb"> </span>pipeline<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>pipeline();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>PlayHandler<span style="color:#bbb"> </span>playHandler<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>PlayHandler();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>pipeline.<span style="color:#309">addLast</span>(<span style="color:#c30">&#34;flashPolicy&#34;</span>,<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>FlashPolicyHandler());<span style="color:#bbb"> 
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>pipeline.<span style="color:#309">addLast</span>(<span style="color:#c30">&#34;decoder&#34;</span>,<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>HttpRequestDecoder());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>pipeline.<span style="color:#309">addLast</span>(<span style="color:#c30">&#34;aggregator&#34;</span>,<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>StreamChunkAggregator(max));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>pipeline.<span style="color:#309">addLast</span>(<span style="color:#c30">&#34;encoder&#34;</span>,<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>HttpResponseEncoder());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>pipeline.<span style="color:#309">addLast</span>(<span style="color:#c30">&#34;chunkedWriter&#34;</span>,<span style="color:#bbb"> </span>playHandler.<span style="color:#309">chunkedWriteHandler</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>pipeline.<span style="color:#309">addLast</span>(<span style="color:#c30">&#34;handler&#34;</span>,<span style="color:#bbb"> </span>playHandler);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>pipeline;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>pipeline依次添加了flash处理器，http request解码器，流区块聚合器，http response编码器，区块写入器，play处理器<br>
+flash处理器和流区块聚合器这里暂且不作详细解析，读者可以理解为这2者的作用分别为传输flash流和合并请求头中有Transfer-Encoding:chunked的请求数据。<br>
+PlayHandler类是Play将netty接收到的request转换为play的request并真正开始业务处理的入口类，我们先暂时放下PlayHandler，先来看看SslHttpServerPipelineFactory做了什么</p>
+<h2 id="sslhttpserverpipelinefactory">
+  SslHttpServerPipelineFactory
+  <a class="heading-link" href="#sslhttpserverpipelinefactory">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>SslHttpServerPipelineFactory是https使用的管道工厂类，他除了添加了一下处理器外，最重要的是根据配置创建了https的连接方式。</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>ChannelPipeline<span style="color:#bbb"> </span><span style="color:#c0f">getPipeline</span>()<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Integer<span style="color:#bbb"> </span>max<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>Integer.<span style="color:#309">valueOf</span>(Play.<span style="color:#309">configuration</span>.<span style="color:#309">getProperty</span>(<span style="color:#c30">&#34;play.netty.maxContentLength&#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;-1&#34;</span>));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>String<span style="color:#bbb"> </span>mode<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>Play.<span style="color:#309">configuration</span>.<span style="color:#309">getProperty</span>(<span style="color:#c30">&#34;play.netty.clientAuth&#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;none&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>ChannelPipeline<span style="color:#bbb"> </span>pipeline<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>pipeline();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">// Add SSL handler first to encrypt and decrypt everything.</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>SSLEngine<span style="color:#bbb"> </span>engine<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>SslHttpServerContextFactory.<span style="color:#309">getServerContext</span>().<span style="color:#309">createSSLEngine</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>engine.<span style="color:#309">setUseClientMode</span>(<span style="color:#069;font-weight:bold">false</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(<span style="color:#c30">&#34;want&#34;</span>.<span style="color:#309">equalsIgnoreCase</span>(mode))<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>engine.<span style="color:#309">setWantClientAuth</span>(<span style="color:#069;font-weight:bold">true</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">else</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(<span style="color:#c30">&#34;need&#34;</span>.<span style="color:#309">equalsIgnoreCase</span>(mode))<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>engine.<span style="color:#309">setNeedClientAuth</span>(<span style="color:#069;font-weight:bold">true</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>engine.<span style="color:#309">setEnableSessionCreation</span>(<span style="color:#069;font-weight:bold">true</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>pipeline.<span style="color:#309">addLast</span>(<span style="color:#c30">&#34;flashPolicy&#34;</span>,<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>FlashPolicyHandler());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>pipeline.<span style="color:#309">addLast</span>(<span style="color:#c30">&#34;ssl&#34;</span>,<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>SslHandler(engine));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>pipeline.<span style="color:#309">addLast</span>(<span style="color:#c30">&#34;decoder&#34;</span>,<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>HttpRequestDecoder());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>pipeline.<span style="color:#309">addLast</span>(<span style="color:#c30">&#34;aggregator&#34;</span>,<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>StreamChunkAggregator(max));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>pipeline.<span style="color:#309">addLast</span>(<span style="color:#c30">&#34;encoder&#34;</span>,<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>HttpResponseEncoder());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>pipeline.<span style="color:#309">addLast</span>(<span style="color:#c30">&#34;chunkedWriter&#34;</span>,<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>ChunkedWriteHandler());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>pipeline.<span style="color:#309">addLast</span>(<span style="color:#c30">&#34;handler&#34;</span>,<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>SslPlayHandler());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>pipeline;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>在设置完SSLEngine后，SslHttpServerPipelineFactory在decoder处理器前加了一个SslHandler来处理连接，这里不是使用playHandler作为处理器，而是使用SslPlayHandler，SslPlayHandler是PlayHandler的一个子类，就是重写了连接和出错时的处理，这里不多做阐述。</p>
+<h2 id="playhandler">
+  PlayHandler
+  <a class="heading-link" href="#playhandler">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>PlayHandler的作用是解析http request的类型，然后根据不同类型来进行不同的处理，由于PlayHandler内处理的东西较多，这里先附上一张大体流程图以供读者参考</p>
+<p><img src="https://s1.ax1x.com/2018/01/16/pdfssg.jpg" alt="PlayHandle流程图"></p>
+<h3 id="messagereceived">
+  messageReceived
+  <a class="heading-link" href="#messagereceived">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>messageReceived是一个Override方法，作用就是在netty消息传递至该handle时进行相应操作,方法代码如下</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">messageReceived</span>(<span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>ChannelHandlerContext<span style="color:#bbb"> </span>ctx,<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>MessageEvent<span style="color:#bbb"> </span>messageEvent)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(Logger.<span style="color:#309">isTraceEnabled</span>())<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Logger.<span style="color:#309">trace</span>(<span style="color:#c30">&#34;messageReceived: begin&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>Object<span style="color:#bbb"> </span>msg<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>messageEvent.<span style="color:#309">getMessage</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//判断是否为HttpRequest的信息，不是则不进行处理</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(msg<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">instanceof</span><span style="color:#bbb"> </span>HttpRequest)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>HttpRequest<span style="color:#bbb"> </span>nettyRequest<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>(HttpRequest)<span style="color:#bbb"> </span>msg;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">// 若为websocket的初次握手请求，则进行websocket握手过程</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(HttpHeaders.<span style="color:#309">Values</span>.<span style="color:#309">WEBSOCKET</span>.<span style="color:#309">equalsIgnoreCase</span>(nettyRequest.<span style="color:#309">getHeader</span>(HttpHeaders.<span style="color:#309">Names</span>.<span style="color:#309">UPGRADE</span>)))<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>websocketHandshake(ctx,<span style="color:#bbb"> </span>nettyRequest,<span style="color:#bbb"> </span>messageEvent);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#069;font-weight:bold">return</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">try</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#09f;font-style:italic">//将netty的request转为Play的request</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>Request<span style="color:#bbb"> </span>request<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>parseRequest(ctx,<span style="color:#bbb"> </span>nettyRequest,<span style="color:#bbb"> </span>messageEvent);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>Response<span style="color:#bbb"> </span>response<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>Response();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#09f;font-style:italic">//Response.current为ThreadLocal&lt;Response&gt;类型，保证每个线程拥有单独Response</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>Http.<span style="color:#309">Response</span>.<span style="color:#309">current</span>.<span style="color:#309">set</span>(response);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#09f;font-style:italic">// Buffered in memory output</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>response.<span style="color:#309">out</span><span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>ByteArrayOutputStream();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#09f;font-style:italic">// Direct output (will be set later)</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>response.<span style="color:#309">direct</span><span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#09f;font-style:italic">// Streamed output (using response.writeChunk)</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>response.<span style="color:#309">onWriteChunk</span>(<span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>Action<span style="color:#555">&lt;</span>Object<span style="color:#555">&gt;</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">invoke</span>(Object<span style="color:#bbb"> </span>result)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                    </span>writeChunk(request,<span style="color:#bbb"> </span>response,<span style="color:#bbb"> </span>ctx,<span style="color:#bbb"> </span>nettyRequest,<span style="color:#bbb"> </span>result);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>});<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#09f;font-style:italic">/*
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic">                查找Play插件(即继承了PlayPlugin抽象类的类)中是否有该request的实现方法，若存在，则用Play插件的实现
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic">                Play自带的插件实现有：
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic">                    CorePlugin实现了/@kill和/@status路径的访问流程
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic">                    DBPlugin实现了/@db路径的访问流程
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic">                    Evolutions实现了/@evolutions路径的访问流程
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic">                这里将插件的访问与其他访问分开最主要原因应该是插件访问不需要启动Play，而其他命令必须先调用Play.start来启动
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic">            */</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#078;font-weight:bold">boolean</span><span style="color:#bbb"> </span>raw<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>Play.<span style="color:#309">pluginCollection</span>.<span style="color:#309">rawInvocation</span>(request,<span style="color:#bbb"> </span>response);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(raw)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>copyResponse(ctx,<span style="color:#bbb"> </span>request,<span style="color:#bbb"> </span>response,<span style="color:#bbb"> </span>nettyRequest);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">else</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span><span style="color:#09f;font-style:italic">/*
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic">                    Invoker.invoke就是向Invoker类中的ScheduledThreadPoolExecutor提交任务并执行
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic">                    使用ScheduledThreadPoolExecutor是因为可以定时，便于执行异步任务
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic">                    Invoker类可以理解为是各个不同容器任务转向Play任务的一个转换类，他下面有2个静态内部类，分别为InvocationContext和Invocation
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic">                    InvocationContext内存放了当前request映射的controller类的annotation
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic">                    Invocation则为Play任务的基类，他的实现类有：
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic">                        Job：Play的异步任务
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic">                        NettyInvocation：netty请求的实现类
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic">                        ServletInvocation：Servlet容器中的实现类
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic">                        WebSocketInvocation：websocket的实现类
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic">                */</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>Invoker.<span style="color:#309">invoke</span>(<span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>NettyInvocation(request,<span style="color:#bbb"> </span>response,<span style="color:#bbb"> </span>ctx,<span style="color:#bbb"> </span>nettyRequest,<span style="color:#bbb"> </span>messageEvent));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(Exception<span style="color:#bbb"> </span>ex)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#09f;font-style:italic">//处理服务器错误</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>serve500(ex,<span style="color:#bbb"> </span>ctx,<span style="color:#bbb"> </span>nettyRequest);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">// 如果msg是websocket，则进行websocket接收</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(msg<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">instanceof</span><span style="color:#bbb"> </span>WebSocketFrame)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>WebSocketFrame<span style="color:#bbb"> </span>frame<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>(WebSocketFrame)<span style="color:#bbb"> </span>msg;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>websocketFrameReceived(ctx,<span style="color:#bbb"> </span>frame);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(Logger.<span style="color:#309">isTraceEnabled</span>())<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Logger.<span style="color:#309">trace</span>(<span style="color:#c30">&#34;messageReceived: end&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>可以很清楚的发现PlayHandler处理请求就是依靠了各个不同的Invocation实现来完成，那我们就来看看Invocation他是如何一步步处理请求的。</p>
+<h3 id="invocation">
+  Invocation
+  <a class="heading-link" href="#invocation">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Invocation是一个抽象类，继承了Runnable接口，它的run方法是这个类的核心。</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">run</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//waitInQueue是一个监视器，监视了这个invocation在队列中等待的时间</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(waitInQueue<span style="color:#bbb"> </span><span style="color:#555">!=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>waitInQueue.<span style="color:#309">stop</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">try</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">//预初始化，是对语言文件的清空</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>preInit();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">//初始化</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(init())<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#09f;font-style:italic">//运行执行前插件任务</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>before();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#09f;font-style:italic">//处理request</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>execute();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#09f;font-style:italic">//运行执行后插件任务</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>after();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#09f;font-style:italic">//成功执行后的处理</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>onSuccess();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(Suspend<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">//Suspend类让请求暂停</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>suspend(e);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>after();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(Throwable<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>onException(e);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">finally</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>_finally();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>这里面的preInit()、before()、after()是没有实现类的，用的就是Invocation类中的方法。我们先来看看Invocation类中对这些方法的实现，然后再来看看他的实现类对这些方法的修改</p>
+<ul>
+<li>init</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">boolean</span><span style="color:#bbb"> </span><span style="color:#c0f">init</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//设置当前线程的classloader</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>Thread.<span style="color:#309">currentThread</span>().<span style="color:#309">setContextClassLoader</span>(Play.<span style="color:#309">classloader</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//检查是否为dev模式，是则检查文件是否修改，以进行热加载</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>Play.<span style="color:#309">detectChanges</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//若Play未启动，启动</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(<span style="color:#555">!</span>Play.<span style="color:#309">started</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(Play.<span style="color:#309">mode</span><span style="color:#bbb"> </span><span style="color:#555">==</span><span style="color:#bbb"> </span>Mode.<span style="color:#309">PROD</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#069;font-weight:bold">throw</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>UnexpectedException(<span style="color:#c30">&#34;Application is not started&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Play.<span style="color:#309">start</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//InvocationContext中添加当前映射方法的annotation</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>InvocationContext.<span style="color:#309">current</span>.<span style="color:#309">set</span>(getInvocationContext());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">true</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p><em>Play.start可以先理解为启动Play服务，具体展开将在之后mvc章节详解</em></p>
+<ul>
+<li>execute</li>
+</ul>
+<p>execute在Invocation类中是一个抽象方法，需要实现类完成自己的实现</p>
+<ul>
+<li>onSuccess</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">onSuccess</span>()<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>Play.<span style="color:#309">pluginCollection</span>.<span style="color:#309">onInvocationSuccess</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>执行play插件中的执行成功方法</p>
+<ul>
+<li>onException</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">onException</span>(Throwable<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>Play.<span style="color:#309">pluginCollection</span>.<span style="color:#309">onInvocationException</span>(e);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(e<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">instanceof</span><span style="color:#bbb"> </span>PlayException)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">throw</span><span style="color:#bbb"> </span>(PlayException)<span style="color:#bbb"> </span>e;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">throw</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>UnexpectedException(e);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>执行play插件中的执行异常方法，然后抛出异常</p>
+<ul>
+<li>suspend</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">suspend</span>(Suspend<span style="color:#bbb"> </span>suspendRequest)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(suspendRequest.<span style="color:#309">task</span><span style="color:#bbb"> </span><span style="color:#555">!=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>WaitForTasksCompletion.<span style="color:#309">waitFor</span>(suspendRequest.<span style="color:#309">task</span>,<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">this</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">else</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Invoker.<span style="color:#309">invoke</span>(<span style="color:#069;font-weight:bold">this</span>,<span style="color:#bbb"> </span>suspendRequest.<span style="color:#309">timeout</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>若暂停的请求有任务，那么调用WaitForTasksCompletion.waitFor进行等待，直到任务完成再继续运行请求
+若没有任务，那就将请求通过ScheduledThreadPoolExecutor.schedule延时一段时间后执行</p>
+<ul>
+<li>_finally</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">_finally</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>Play.<span style="color:#309">pluginCollection</span>.<span style="color:#309">invocationFinally</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>InvocationContext.<span style="color:#309">current</span>.<span style="color:#309">remove</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>执行play插件中的invocationFinally方法</p>
+<h4 id="nettyinvocation">
+  NettyInvocation
+  <a class="heading-link" href="#nettyinvocation">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>NettyInvocation是netty请求使用的实现类，我们来依次看看他对init,execute,onSuccess等方法的实现上相比Invocation改变了什么</p>
+<ul>
+<li>run</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">run</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">try</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(Logger.<span style="color:#309">isTraceEnabled</span>())<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>Logger.<span style="color:#309">trace</span>(<span style="color:#c30">&#34;run: begin&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">super</span>.<span style="color:#309">run</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(Exception<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>serve500(e,<span style="color:#bbb"> </span>ctx,<span style="color:#bbb"> </span>nettyRequest);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(Logger.<span style="color:#309">isTraceEnabled</span>())<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Logger.<span style="color:#309">trace</span>(<span style="color:#c30">&#34;run: end&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>NettyInvocation的run方法和基类唯一的差别就是包了一层try catch来处理服务器错误，这里有一点要注意，可以发现，NettyInvocation的run有一层try catch来处理500错误，PlayHandle中的messageReceived也有一层try catch来处理500错误，我的理解是前者是用来处理业务流程中的错误的，后者是为了防止意外错误引发整个服务器挂掉所以又套了一层做保险</p>
+<ul>
+<li>init</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">boolean</span><span style="color:#bbb"> </span><span style="color:#c0f">init</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//设置当前线程的classloader</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>Thread.<span style="color:#309">currentThread</span>().<span style="color:#309">setContextClassLoader</span>(Play.<span style="color:#309">classloader</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(Logger.<span style="color:#309">isTraceEnabled</span>())<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Logger.<span style="color:#309">trace</span>(<span style="color:#c30">&#34;init: begin&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//设置当前线程的request和response</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>Request.<span style="color:#309">current</span>.<span style="color:#309">set</span>(request);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>Response.<span style="color:#309">current</span>.<span style="color:#309">set</span>(response);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">try</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">//如果是dev模式检查路径更新</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(Play.<span style="color:#309">mode</span><span style="color:#bbb"> </span><span style="color:#555">==</span><span style="color:#bbb"> </span>Play.<span style="color:#309">Mode</span>.<span style="color:#309">DEV</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>Router.<span style="color:#309">detectChanges</span>(Play.<span style="color:#309">ctxPath</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">//如果是prod模式且静态路径缓存有当前请求信息，则从缓存中获取</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(Play.<span style="color:#309">mode</span><span style="color:#bbb"> </span><span style="color:#555">==</span><span style="color:#bbb"> </span>Play.<span style="color:#309">Mode</span>.<span style="color:#309">PROD</span><span style="color:#bbb"> </span><span style="color:#555">&amp;&amp;</span><span style="color:#bbb"> </span>staticPathsCache.<span style="color:#309">containsKey</span>(request.<span style="color:#309">domain</span><span style="color:#bbb"> </span><span style="color:#555">+</span><span style="color:#bbb"> </span><span style="color:#c30">&#34; &#34;</span><span style="color:#bbb"> </span><span style="color:#555">+</span><span style="color:#bbb"> </span>request.<span style="color:#309">method</span><span style="color:#bbb"> </span><span style="color:#555">+</span><span style="color:#bbb"> </span><span style="color:#c30">&#34; &#34;</span><span style="color:#bbb"> </span><span style="color:#555">+</span><span style="color:#bbb"> </span>request.<span style="color:#309">path</span>))<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>RenderStatic<span style="color:#bbb"> </span>rs<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#069;font-weight:bold">synchronized</span><span style="color:#bbb"> </span>(staticPathsCache)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>rs<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>staticPathsCache.<span style="color:#309">get</span>(request.<span style="color:#309">domain</span><span style="color:#bbb"> </span><span style="color:#555">+</span><span style="color:#bbb"> </span><span style="color:#c30">&#34; &#34;</span><span style="color:#bbb"> </span><span style="color:#555">+</span><span style="color:#bbb"> </span>request.<span style="color:#309">method</span><span style="color:#bbb"> </span><span style="color:#555">+</span><span style="color:#bbb"> </span><span style="color:#c30">&#34; &#34;</span><span style="color:#bbb"> </span><span style="color:#555">+</span><span style="color:#bbb"> </span>request.<span style="color:#309">path</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#09f;font-style:italic">//使用静态资源</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>serveStatic(rs,<span style="color:#bbb"> </span>ctx,<span style="color:#bbb"> </span>request,<span style="color:#bbb"> </span>response,<span style="color:#bbb"> </span>nettyRequest,<span style="color:#bbb"> </span>event);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(Logger.<span style="color:#309">isTraceEnabled</span>())<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>Logger.<span style="color:#309">trace</span>(<span style="color:#c30">&#34;init: end false&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">false</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">//检查是否为静态资源</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Router.<span style="color:#309">routeOnlyStatic</span>(request);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">super</span>.<span style="color:#309">init</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(NotFound<span style="color:#bbb"> </span>nf)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">//返回404</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>serve404(nf,<span style="color:#bbb"> </span>ctx,<span style="color:#bbb"> </span>request,<span style="color:#bbb"> </span>nettyRequest);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(Logger.<span style="color:#309">isTraceEnabled</span>())<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>Logger.<span style="color:#309">trace</span>(<span style="color:#c30">&#34;init: end false&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">false</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(RenderStatic<span style="color:#bbb"> </span>rs)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">//使用静态资源</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(Play.<span style="color:#309">mode</span><span style="color:#bbb"> </span><span style="color:#555">==</span><span style="color:#bbb"> </span>Play.<span style="color:#309">Mode</span>.<span style="color:#309">PROD</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#069;font-weight:bold">synchronized</span><span style="color:#bbb"> </span>(staticPathsCache)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>staticPathsCache.<span style="color:#309">put</span>(request.<span style="color:#309">domain</span><span style="color:#bbb"> </span><span style="color:#555">+</span><span style="color:#bbb"> </span><span style="color:#c30">&#34; &#34;</span><span style="color:#bbb"> </span><span style="color:#555">+</span><span style="color:#bbb"> </span>request.<span style="color:#309">method</span><span style="color:#bbb"> </span><span style="color:#555">+</span><span style="color:#bbb"> </span><span style="color:#c30">&#34; &#34;</span><span style="color:#bbb"> </span><span style="color:#555">+</span><span style="color:#bbb"> </span>request.<span style="color:#309">path</span>,<span style="color:#bbb"> </span>rs);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>serveStatic(rs,<span style="color:#bbb"> </span>ctx,<span style="color:#bbb"> </span>request,<span style="color:#bbb"> </span>response,<span style="color:#bbb"> </span>nettyRequest,<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">event</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(Logger.<span style="color:#309">isTraceEnabled</span>())<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>Logger.<span style="color:#309">trace</span>(<span style="color:#c30">&#34;init: end false&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">false</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(Logger.<span style="color:#309">isTraceEnabled</span>())<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Logger.<span style="color:#309">trace</span>(<span style="color:#c30">&#34;init: end true&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">true</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>可以看出，NettyInvocation的初始化就是在基类初始化之前判断request的路径，处理静态资源以及处理路径不存在的资源，这里也就说明了访问路由设置中的静态资源是不需要启动play服务的，<del>是否意味着可以通过play搭建一个静态资源服务器？</del></p>
+<ul>
+<li>execute</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">execute</span>()<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//检查连接是否中断</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(<span style="color:#555">!</span>ctx.<span style="color:#309">getChannel</span>().<span style="color:#309">isConnected</span>())<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">try</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>ctx.<span style="color:#309">getChannel</span>().<span style="color:#309">close</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(Throwable<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#09f;font-style:italic">// Ignore</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//渲染之前检查长度</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>saveExceededSizeError(nettyRequest,<span style="color:#bbb"> </span>request,<span style="color:#bbb"> </span>response);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//运行</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>ActionInvoker.<span style="color:#309">invoke</span>(request,<span style="color:#bbb"> </span>response);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>ActionInvoker.invoke是play mvc的执行入口方法，这个在之后会进行详解</p>
+<ul>
+<li>success</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">onSuccess</span>()<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">super</span>.<span style="color:#309">onSuccess</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(response.<span style="color:#309">chunked</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>closeChunked(request,<span style="color:#bbb"> </span>response,<span style="color:#bbb"> </span>ctx,<span style="color:#bbb"> </span>nettyRequest);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">else</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>copyResponse(ctx,<span style="color:#bbb"> </span>request,<span style="color:#bbb"> </span>response,<span style="color:#bbb"> </span>nettyRequest);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(Logger.<span style="color:#309">isTraceEnabled</span>())<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Logger.<span style="color:#309">trace</span>(<span style="color:#c30">&#34;execute: end&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>成功之后就判断是否是chunked类型的request，若是则关闭区块流并返回response，若不是则返回正常的response</p>
+<h4 id="job">
+  Job
+  <a class="heading-link" href="#job">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>Job是Play任务的基类，用来处理异步任务，Job虽然继承了Invocation，但他并不会加入至Play的主线程池执行，Job有自己单独的线程池进行处理。因为Job可能需要一个返回值，所以它同时继承了Callable接口来提供返回值。
+既然job能提供返回值，那真正起作用的方法就是call()而不是run(),我们来看一下他的call方法</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>V<span style="color:#bbb"> </span><span style="color:#c0f">call</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>Monitor<span style="color:#bbb"> </span>monitor<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">try</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(init())<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>before();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>V<span style="color:#bbb"> </span>result<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#069;font-weight:bold">try</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>lastException<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>lastRun<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>System.<span style="color:#309">currentTimeMillis</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>monitor<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>MonitorFactory.<span style="color:#309">start</span>(getClass().<span style="color:#309">getName</span>()<span style="color:#555">+</span><span style="color:#c30">&#34;.doJob()&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span><span style="color:#09f;font-style:italic">//执行任务并返回结果</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>result<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>doJobWithResult();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>monitor.<span style="color:#309">stop</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>monitor<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>wasError<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">false</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(PlayException<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span><span style="color:#069;font-weight:bold">throw</span><span style="color:#bbb"> </span>e;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(Exception<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>StackTraceElement<span style="color:#bbb"> </span>element<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>PlayException.<span style="color:#309">getInterestingStrackTraceElement</span>(e);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(element<span style="color:#bbb"> </span><span style="color:#555">!=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                    </span><span style="color:#069;font-weight:bold">throw</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>JavaExecutionException(Play.<span style="color:#309">classes</span>.<span style="color:#309">getApplicationClass</span>(element.<span style="color:#309">getClassName</span>()),<span style="color:#bbb"> </span>element.<span style="color:#309">getLineNumber</span>(),<span style="color:#bbb"> </span>e);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span><span style="color:#069;font-weight:bold">throw</span><span style="color:#bbb"> </span>e;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>after();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>result;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(Throwable<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>onException(e);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">finally</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span>(monitor<span style="color:#bbb"> </span><span style="color:#555">!=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>monitor.<span style="color:#309">stop</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>_finally();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>可以看出，job的call方法和Invocation的run方法其实差不多，中间执行job的代码其实就是execute方法的实现，但是有一点不同的是，job方法完成后不会调用onSuccess()方法。
+这里只是提一下Job与Invocation类的关系，job任务的处理放在之后的插件篇再谈</p>
+<h4 id="websocketinvocation">
+  WebSocketInvocation
+  <a class="heading-link" href="#websocketinvocation">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>WebSocketInvocation是websocket请求的实现类，我们来具体看下他对Invocation的方法做了怎么样的复写</p>
+<ul>
+<li>init</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">boolean</span><span style="color:#bbb"> </span><span style="color:#c0f">init</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>Http.<span style="color:#309">Request</span>.<span style="color:#309">current</span>.<span style="color:#309">set</span>(request);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>Http.<span style="color:#309">Inbound</span>.<span style="color:#309">current</span>.<span style="color:#309">set</span>(inbound);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>Http.<span style="color:#309">Outbound</span>.<span style="color:#309">current</span>.<span style="color:#309">set</span>(outbound);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">super</span>.<span style="color:#309">init</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>没什么大的变动，就是在当前线程下添加了出入站的通道信息</p>
+<ul>
+<li>execute</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">execute</span>()<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>WebSocketInvoker.<span style="color:#309">invoke</span>(request,<span style="color:#bbb"> </span>inbound,<span style="color:#bbb"> </span>outbound);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>execute方法就是将request请求，出入站通道传入WebSocketInvoker.invoke进行处理，WebSocketInvoker.invoke的代码如下，可以看出WebSocketInvoker.invoke方法也就是调用了ActionInvoker.invoke来对请求进行处理。</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">static</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">invoke</span>(Http.<span style="color:#309">Request</span><span style="color:#bbb"> </span>request,<span style="color:#bbb"> </span>Http.<span style="color:#309">Inbound</span><span style="color:#bbb"> </span>inbound,<span style="color:#bbb"> </span>Http.<span style="color:#309">Outbound</span><span style="color:#bbb"> </span>outbound)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">try</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(Play.<span style="color:#309">mode</span><span style="color:#bbb"> </span><span style="color:#555">==</span><span style="color:#bbb"> </span>Play.<span style="color:#309">Mode</span>.<span style="color:#309">DEV</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>WebSocketController.<span style="color:#309">class</span>.<span style="color:#309">getDeclaredField</span>(<span style="color:#c30">&#34;inbound&#34;</span>).<span style="color:#309">set</span>(<span style="color:#069;font-weight:bold">null</span>,<span style="color:#bbb"> </span>Http.<span style="color:#309">Inbound</span>.<span style="color:#309">current</span>());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>WebSocketController.<span style="color:#309">class</span>.<span style="color:#309">getDeclaredField</span>(<span style="color:#c30">&#34;outbound&#34;</span>).<span style="color:#309">set</span>(<span style="color:#069;font-weight:bold">null</span>,<span style="color:#bbb"> </span>Http.<span style="color:#309">Outbound</span>.<span style="color:#309">current</span>());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>WebSocketController.<span style="color:#309">class</span>.<span style="color:#309">getDeclaredField</span>(<span style="color:#c30">&#34;params&#34;</span>).<span style="color:#309">set</span>(<span style="color:#069;font-weight:bold">null</span>,<span style="color:#bbb"> </span>Scope.<span style="color:#309">Params</span>.<span style="color:#309">current</span>());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>WebSocketController.<span style="color:#309">class</span>.<span style="color:#309">getDeclaredField</span>(<span style="color:#c30">&#34;request&#34;</span>).<span style="color:#309">set</span>(<span style="color:#069;font-weight:bold">null</span>,<span style="color:#bbb"> </span>Http.<span style="color:#309">Request</span>.<span style="color:#309">current</span>());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>WebSocketController.<span style="color:#309">class</span>.<span style="color:#309">getDeclaredField</span>(<span style="color:#c30">&#34;session&#34;</span>).<span style="color:#309">set</span>(<span style="color:#069;font-weight:bold">null</span>,<span style="color:#bbb"> </span>Scope.<span style="color:#309">Session</span>.<span style="color:#309">current</span>());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>WebSocketController.<span style="color:#309">class</span>.<span style="color:#309">getDeclaredField</span>(<span style="color:#c30">&#34;validation&#34;</span>).<span style="color:#309">set</span>(<span style="color:#069;font-weight:bold">null</span>,<span style="color:#bbb"> </span>Validation.<span style="color:#309">current</span>());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">//websocket是没有response的</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>ActionInvoker.<span style="color:#309">invoke</span>(request,<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(PlayException<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">throw</span><span style="color:#bbb"> </span>e;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(Exception<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">throw</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>UnexpectedException(e);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><ul>
+<li>onSuccess</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">onSuccess</span>()<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>outbound.<span style="color:#309">close</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">super</span>.<span style="color:#309">onSuccess</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>websocket只有当连接关闭时才会触发onSuccess方法，所以onSuccess相比Invocation也就多了一个关闭出站通道的操作</p>
+<h4 id="servletinvocation">
+  ServletInvocation
+  <a class="heading-link" href="#servletinvocation">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>ServletInvocation是当使用Servlet容器时的实现类，也就是将程序用war打包后放在Servlet容器后运行的类，ServletInvocation不直接基础于Invocation，而且继承于DirectInvocation，DirectInvocation继承了Invocation，DirectInvocation类添加了一个Suspend字段，用来处理线程暂停或等待操作。
+因为在Servlet规范中请求线程的管理交由Servlet容器处理，所以ServletInvocation不是使用Invoker的ScheduledThreadPoolExecutor来执行的，那么在配置文件中设置play.pool数量对于使用Servlet容器的程序是无效的。
+既然ServletInvocation不是使用Invoker中的线程池运行的，那他是从什么地方初始化这个类并运行的呢，这点将在本篇的ServletWrapper中再详解</p>
+<p>我们来看看ServletInvocation对Invocation中的方法进行了怎样的覆写</p>
+<ul>
+<li>init</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">boolean</span><span style="color:#bbb"> </span><span style="color:#c0f">init</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">try</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">super</span>.<span style="color:#309">init</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(NotFound<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>serve404(httpServletRequest,<span style="color:#bbb"> </span>httpServletResponse,<span style="color:#bbb"> </span>e);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">false</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(RenderStatic<span style="color:#bbb"> </span>r)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">try</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>serveStatic(httpServletResponse,<span style="color:#bbb"> </span>httpServletRequest,<span style="color:#bbb"> </span>r);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(IOException<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#069;font-weight:bold">throw</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>UnexpectedException(e);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">false</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>很简单的初始化，和NettyInvocation相比就是静态资源的缓存交由Servlet容器处理</p>
+<ul>
+<li>run</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">run</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">try</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">super</span>.<span style="color:#309">run</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(Exception<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>serve500(e,<span style="color:#bbb"> </span>httpServletRequest,<span style="color:#bbb"> </span>httpServletResponse);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>与NettyInvocation一样</p>
+<ul>
+<li>execute</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">execute</span>()<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>ActionInvoker.<span style="color:#309">invoke</span>(request,<span style="color:#bbb"> </span>response);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>copyResponse(request,<span style="color:#bbb"> </span>response,<span style="color:#bbb"> </span>httpServletRequest,<span style="color:#bbb"> </span>httpServletResponse);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>ServletInvocation在execute结束后就将结果返回，这里不知道为什么不和NettyInvocation统一一下，都在execute阶段返回结果或者都在onSuccess阶段返回结果</p>
+<p><strong>使用netty的流程我们已经理清楚了，简单来说就是讲netty的请求处理后交由ActionInvoker.invoke来执行，ActionInvoker.invoke也是之后要研究的重点。</strong></p>
+<h1 id="servletwrapper">
+  ServletWrapper
+  <a class="heading-link" href="#servletwrapper">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>这篇的一开始我们以Server类为入口阐述了使用java命令直接运行时的运行过程，那么如果程序用war打包后放在Servlet容器中是如何运行的呢?
+我们可以打开play程序包下resources/war的web.xml来看看默认的web.xml中是怎么配置的。</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-xml" data-lang="xml"><span style="display:flex;"><span>  <span style="color:#309;font-weight:bold">&lt;listener&gt;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#309;font-weight:bold">&lt;listener-class&gt;</span>play.server.ServletWrapper<span style="color:#309;font-weight:bold">&lt;/listener-class&gt;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#309;font-weight:bold">&lt;/listener&gt;</span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#309;font-weight:bold">&lt;servlet&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&lt;servlet-name&gt;</span>play<span style="color:#309;font-weight:bold">&lt;/servlet-name&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&lt;servlet-class&gt;</span>play.server.ServletWrapper<span style="color:#309;font-weight:bold">&lt;/servlet-class&gt;</span>	
+</span></span><span style="display:flex;"><span>  <span style="color:#309;font-weight:bold">&lt;/servlet&gt;</span>
+</span></span></code></pre></div><p>可以看出监听器和servlet入口都是ServletWrapper，那我们从程序的创建开始一点点剖析play的运行过程</p>
+<h2 id="contextinitialized">
+  contextInitialized
+  <a class="heading-link" href="#contextinitialized">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>contextInitialized是在启动时自动加载，主要完成一些初始化的工作，代码如下</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">contextInitialized</span>(ServletContextEvent<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//standalonePlayServer表示这是否是一个独立服务器</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>Play.<span style="color:#309">standalonePlayServer</span><span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">false</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>ClassLoader<span style="color:#bbb"> </span>oldClassLoader<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>Thread.<span style="color:#309">currentThread</span>().<span style="color:#309">getContextClassLoader</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//这是程序根目录</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>String<span style="color:#bbb"> </span>appDir<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>e.<span style="color:#309">getServletContext</span>().<span style="color:#309">getRealPath</span>(<span style="color:#c30">&#34;/WEB-INF/application&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>File<span style="color:#bbb"> </span>root<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>File(appDir);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//play id在web.xml中配置</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>String<span style="color:#bbb"> </span>playId<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>System.<span style="color:#309">getProperty</span>(<span style="color:#c30">&#34;play.id&#34;</span>,<span style="color:#bbb"> </span>e.<span style="color:#309">getServletContext</span>().<span style="color:#309">getInitParameter</span>(<span style="color:#c30">&#34;play.id&#34;</span>));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(StringUtils.<span style="color:#309">isEmpty</span>(playId))<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">throw</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>UnexpectedException(<span style="color:#c30">&#34;Please define a play.id parameter in your web.xml file. Without that parameter, play! cannot start your application. Please add a context-param into the WEB-INF/web.xml file.&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>Play.<span style="color:#309">frameworkPath</span><span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>root.<span style="color:#309">getParentFile</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//使用预编译的文件</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>Play.<span style="color:#309">usePrecompiled</span><span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">true</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//初始化,初始化过程中会将运行模式强制改为prod</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>Play.<span style="color:#309">init</span>(root,<span style="color:#bbb"> </span>playId);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//检查配置文件中模式是不是dev，是dev提示自动切换为prod</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>Play.<span style="color:#309">Mode</span><span style="color:#bbb"> </span>mode<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>Play.<span style="color:#309">Mode</span>.<span style="color:#309">valueOf</span>(Play.<span style="color:#309">configuration</span>.<span style="color:#309">getProperty</span>(<span style="color:#c30">&#34;application.mode&#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;DEV&#34;</span>).<span style="color:#309">toUpperCase</span>());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(mode.<span style="color:#309">isDev</span>())<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Logger.<span style="color:#309">info</span>(<span style="color:#c30">&#34;Forcing PROD mode because deploying as a war file.&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">// Servlet 2.4手动加载路径</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">// Servlet 2.4 does not allow you to get the context path from the servletcontext...</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(isGreaterThan(e.<span style="color:#309">getServletContext</span>(),<span style="color:#bbb"> </span>2,<span style="color:#bbb"> </span>4))<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>loadRouter(e.<span style="color:#309">getServletContext</span>().<span style="color:#309">getContextPath</span>());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>Thread.<span style="color:#309">currentThread</span>().<span style="color:#309">setContextClassLoader</span>(oldClassLoader);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>初始化过程有2个地方需要注意</p>
+<ol>
+<li>不管配置文件中使用的是什么模式，放在Servlet容器中会统一改为prod</li>
+<li>默认使用预编译模式加载</li>
+</ol>
+<h2 id="service">
+  service
+  <a class="heading-link" href="#service">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>service是servlet处理request的方法，我们先来看一下他的实现代码</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">protected</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">service</span>(HttpServletRequest<span style="color:#bbb"> </span>httpServletRequest,<span style="color:#bbb"> </span>HttpServletResponse<span style="color:#bbb"> </span>httpServletResponse)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>ServletException,<span style="color:#bbb"> </span>IOException<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">//路由还没初始化时初始化路由</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(<span style="color:#555">!</span>routerInitializedWithContext)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>loadRouter(httpServletRequest.<span style="color:#309">getContextPath</span>());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(Logger.<span style="color:#309">isTraceEnabled</span>())<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Logger.<span style="color:#309">trace</span>(<span style="color:#c30">&#34;ServletWrapper&gt;service &#34;</span><span style="color:#bbb"> </span><span style="color:#555">+</span><span style="color:#bbb"> </span>httpServletRequest.<span style="color:#309">getRequestURI</span>());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>Request<span style="color:#bbb"> </span>request<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">try</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Response<span style="color:#bbb"> </span>response<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>Response();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>response.<span style="color:#309">out</span><span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>ByteArrayOutputStream();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Response.<span style="color:#309">current</span>.<span style="color:#309">set</span>(response);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">//httpServletRequest转为play的request</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>request<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>parseRequest(httpServletRequest);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(Logger.<span style="color:#309">isTraceEnabled</span>())<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>Logger.<span style="color:#309">trace</span>(<span style="color:#c30">&#34;ServletWrapper&gt;service, request: &#34;</span><span style="color:#bbb"> </span><span style="color:#555">+</span><span style="color:#bbb"> </span>request);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">//检查插件中是否有实现</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#078;font-weight:bold">boolean</span><span style="color:#bbb"> </span>raw<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>Play.<span style="color:#309">pluginCollection</span>.<span style="color:#309">rawInvocation</span>(request,<span style="color:#bbb"> </span>response);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(raw)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>copyResponse(Request.<span style="color:#309">current</span>(),<span style="color:#bbb"> </span>Response.<span style="color:#309">current</span>(),<span style="color:#bbb"> </span>httpServletRequest,<span style="color:#bbb"> </span>httpServletResponse);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">else</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#09f;font-style:italic">//这里不是Invoker.invoke()方法，是invokeInThread</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>Invoker.<span style="color:#309">invokeInThread</span>(<span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>ServletInvocation(request,<span style="color:#bbb"> </span>response,<span style="color:#bbb"> </span>httpServletRequest,<span style="color:#bbb"> </span>httpServletResponse));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(NotFound<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">//处理404</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(Logger.<span style="color:#309">isTraceEnabled</span>())<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>Logger.<span style="color:#309">trace</span>(<span style="color:#c30">&#34;ServletWrapper&gt;service, NotFound: &#34;</span><span style="color:#bbb"> </span><span style="color:#555">+</span><span style="color:#bbb"> </span>e);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>serve404(httpServletRequest,<span style="color:#bbb"> </span>httpServletResponse,<span style="color:#bbb"> </span>e);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(RenderStatic<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">//处理静态资源</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(Logger.<span style="color:#309">isTraceEnabled</span>())<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>Logger.<span style="color:#309">trace</span>(<span style="color:#c30">&#34;ServletWrapper&gt;service, RenderStatic: &#34;</span><span style="color:#bbb"> </span><span style="color:#555">+</span><span style="color:#bbb"> </span>e);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>serveStatic(httpServletResponse,<span style="color:#bbb"> </span>httpServletRequest,<span style="color:#bbb"> </span>e);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span>(URISyntaxException<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">//处理404</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>serve404(httpServletRequest,<span style="color:#bbb"> </span>httpServletResponse,<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>NotFound(e.<span style="color:#309">toString</span>()));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(Throwable<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">throw</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>ServletException(e);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">finally</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">//因为servlet的线程会复用，所以要手动删除当前线程内的值</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Request.<span style="color:#309">current</span>.<span style="color:#309">remove</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Response.<span style="color:#309">current</span>.<span style="color:#309">remove</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Scope.<span style="color:#309">Session</span>.<span style="color:#309">current</span>.<span style="color:#309">remove</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Scope.<span style="color:#309">Params</span>.<span style="color:#309">current</span>.<span style="color:#309">remove</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Scope.<span style="color:#309">Flash</span>.<span style="color:#309">current</span>.<span style="color:#309">remove</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Scope.<span style="color:#309">RenderArgs</span>.<span style="color:#309">current</span>.<span style="color:#309">remove</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Scope.<span style="color:#309">RouteArgs</span>.<span style="color:#309">current</span>.<span style="color:#309">remove</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>CachedBoundActionMethodArgs.<span style="color:#309">clear</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>看的出和PlayHandle其实就是一个处理方式，先转为play的request再扔到Invoker类中进行处理，那么我们来看看Invoker.invokeInThread的具体实现过程</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">static</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">invokeInThread</span>(DirectInvocation<span style="color:#bbb"> </span>invocation)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#078;font-weight:bold">boolean</span><span style="color:#bbb"> </span>retry<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">true</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">while</span><span style="color:#bbb"> </span>(retry)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>invocation.<span style="color:#309">run</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(invocation.<span style="color:#309">retry</span><span style="color:#bbb"> </span><span style="color:#555">==</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>retry<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">false</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">else</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#069;font-weight:bold">try</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(invocation.<span style="color:#309">retry</span>.<span style="color:#309">task</span><span style="color:#bbb"> </span><span style="color:#555">!=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                    </span>invocation.<span style="color:#309">retry</span>.<span style="color:#309">task</span>.<span style="color:#309">get</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">else</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                    </span>Thread.<span style="color:#309">sleep</span>(invocation.<span style="color:#309">retry</span>.<span style="color:#309">timeout</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(Exception<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span><span style="color:#069;font-weight:bold">throw</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>UnexpectedException(e);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>retry<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">true</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>invokeInThread就是在当前线程下运行invocation，如果遇到暂停或者等待任务完成就循环直到完成。<br>
+<strong>要注意的一点是，Play 1.2.6未完成servlet模式下的websocket实现，所以如果要用websocket请用netty模式</strong></p>
+<h1 id="总结">
+  总结
+  <a class="heading-link" href="#%e6%80%bb%e7%bb%93">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>至此，play的2种正常运行的启动逻辑已经分析完毕，play的启动过程还是在与不同的服务器运行容器打交道，如何将转化后的请求交由ActionInvoker来处理。
+下一篇，我们先不看ActionInvoker的具体实现，先看看play对配置文件及路由的分析处理过程。</p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+        
+        
+
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2024
+    
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+  
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>
