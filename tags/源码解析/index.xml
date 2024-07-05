@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>源码解析 on 404 NOT FOUND</title>
+    <link>http://localhost:1313/tags/%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/</link>
+    <description>Recent content in 源码解析 on 404 NOT FOUND</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 11 Jan 2018 15:16:54 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Play framework源码解析 Part2:Server与ServletWrapper</title>
+      <link>http://localhost:1313/posts/play-framework/2018-01-11-play-framework%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90-part2-server%E4%B8%8Eservletwrapper/</link>
+      <pubDate>Thu, 11 Jan 2018 15:16:54 +0000</pubDate>
+      <guid>http://localhost:1313/posts/play-framework/2018-01-11-play-framework%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90-part2-server%E4%B8%8Eservletwrapper/</guid>
+      <description>在上一节中我们剖析了Play framework的启动原理，很容易就能发现Play framework的启动主入口在play.server.Server中，在本节，我们来一起看看Server类中主要发生了什么。&#xA;Server类 Link to heading 既然是程序运行的主入口，那么必然是由main方法进入的，Server类中的main方法十分简单。源码如下:&#xA;{% codeblock lang:java %} public static void main(String[] args) throws Exception { File root = new File(System.getProperty(&amp;ldquo;application.path&amp;rdquo;)); //获取参数中的precompiled if (System.getProperty(&amp;ldquo;precompiled&amp;rdquo;, &amp;ldquo;false&amp;rdquo;).equals(&amp;ldquo;true&amp;rdquo;)) { Play.usePrecompiled = true; } //获取参数中的writepid if (System.getProperty(&amp;ldquo;writepid&amp;rdquo;, &amp;ldquo;false&amp;rdquo;).equals(&amp;ldquo;true&amp;rdquo;)) { //这个方法的作用是检查当前目录下是否存在server.pid文件，若存在表明当前已有程序在运行 writePID(root); } //Play类的初始化 Play.init(root, System.getProperty(&amp;ldquo;play.id&amp;rdquo;, &amp;ldquo;&amp;rdquo;)); if (System.getProperty(&amp;ldquo;precompile&amp;rdquo;) == null) { //Server类初始化 new Server(args); } else { Logger.info(&amp;ldquo;Done.&amp;rdquo;); } } {% endcodeblock %}&#xA;main方法执行的操作很简单:&#xA;获取程序路径 检查是否存在precompiled参数 检查是否存在writepid参数，若存在则检查是否存在server.pid文件，若存在则表明已有程序在运行，不存在则将当前程序pid写入server.pid play类初始化 检查是否存在precompile参数项，若存在表示是个预编译行为，结束运行，若没有则启动服务 这其中最重要的便是Play类的初始化以及Server类的初始化 这里我们先来看Server类的初始化过程，现在可以先简单的将Play类的初始化理解为Play框架中一些常量的初始化以及日志、配置文件、路由信息等配置的读取。 这里贴一下Server类的初始化过程： {% codeblock lang:java %} public Server(String[] args) { //设置文件编码为UTF-8 System.</description>
+    </item>
+  </channel>
+</rss>
