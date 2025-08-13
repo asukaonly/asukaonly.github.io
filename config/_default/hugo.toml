@@ -5,7 +5,7 @@ theme = "hugo-coder"
 
 
 enableEmoji = true
-
+buildFuture = true
 # 样式参考 https://swapoff.org/chroma/playground
 [markup.highlight]
 style = 'manni'

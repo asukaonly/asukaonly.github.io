@@ -16,3 +16,9 @@ icon = "fa-brands fa-x-twitter fa-2x"
 weight = 2
 url = "https://twitter.com/my_lifefor_aiur"
 target = "_blank"
+
+[utterances]
+enable = true
+repo = "asukaonly/blog-comments"
+issueTerm = "pathname"
+theme = "github-light"
