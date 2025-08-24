@@ -41,7 +41,7 @@ enabled = true
 url = "https://github.com/"
 imageUrl = "avatar.png"
 subtitle = "1234512"
-title = "What is mind? \n No matter. \nWhat is matter? \nNever mind."
+title = "What is mind? \n No matter. \nWhat is matter \nNever mind."
 
 
 [[socialIcons]]
