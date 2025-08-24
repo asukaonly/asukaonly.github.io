@@ -1,21 +1,67 @@
+keywords = ["blog", "developer", "personal"]
 description = "「What is mind? No matter.What is matter? Never mind.」"
-keywords = "blog,developer,personal,"
+author = "asuka"
+
 avatarurl = "avatar.png"
 info = ["What is mind? ", "No matter. ", "What is matter? ", "Never mind."]
 
+images = ["/avatar.png"]
+DateFormat = "January 2, 2006"
+defaultTheme = "auto"          # dark, lightdisableThemeToggle: false
 
-[[social]]
-name = "Github"
+env = "production"
+
+ShowReadingTime = true
+ShowShareButtons = true
+ShowPostNavLinks = true
+ShowBreadCrumbs = true
+ShowCodeCopyButtons = false
+ShowWordCount = true
+ShowRssButtonInSectionTermList = true
+UseHugoToc = true
+disableSpecial1stPost = false
+disableScrollToTop = false
+comments = false
+hidemeta = false
+hideSummary = false
+showtoc = false
+tocopen = false
+
+
+[assets]
+favicon = "avatar.png"
+favicon16x16 = "avatar.png"
+favicon32x32 = "avatar.png"
+apple_touch_icon = "avatar.png"
+safari_pinned_tab = "avatar.png"
+
+
+[profileMode]
+enabled = true
+url = "https://github.com/"
+imageUrl = "avatar.png"
+subtitle = "1234512"
+title = "What is mind? \n No matter. \nWhat is matter? \nNever mind."
+
+
+[[socialIcons]]
+name = "github"
 icon = "fa-brands fa-github fa-2x"
 weight = 1
 url = "https://github.com/asukaonly"
 target = "_blank"
-[[social]]
-name = "Twitter"
+[[socialIcons]]
+name = "x"
 icon = "fa-brands fa-x-twitter fa-2x"
 weight = 2
 url = "https://twitter.com/my_lifefor_aiur"
 target = "_blank"
+
+[analytics.google]
+SiteVerificationTag = "XYZabc"
+
+[cover]
+hidden = true
 
 [utterances]
 enable = true
