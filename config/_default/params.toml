@@ -1,31 +1,30 @@
-keywords = ["blog", "developer", "personal"]
-description = "「What is mind? No matter.What is matter? Never mind.」"
-author = "asuka"
-
-avatarurl = "avatar.png"
-info = ["What is mind? ", "No matter. ", "What is matter? ", "Never mind."]
-
-images = ["/avatar.png"]
-DateFormat = "January 2, 2006"
-defaultTheme = "auto"          # dark, lightdisableThemeToggle: false
-
 env = "production"
 
+author = "luyanliang"
+
+keywords = ["blog", "developer", "personal"]
+images = ["/avatar.png"]
+DateFormat = "January 2, 2006"
+defaultTheme = "light"
+disableThemeToggle = true
+
 ShowReadingTime = true
-ShowShareButtons = true
+ShowShareButtons = false
 ShowPostNavLinks = true
 ShowBreadCrumbs = true
-ShowCodeCopyButtons = false
+ShowCodeCopyButtons = true
 ShowWordCount = true
-ShowRssButtonInSectionTermList = true
-UseHugoToc = true
+ShowRssButtonInSectionTermList = false
 disableSpecial1stPost = false
 disableScrollToTop = false
-comments = false
 hidemeta = false
 hideSummary = false
-showtoc = false
-tocopen = false
+
+tocopen = true
+UseHugoToc = true
+showtoc = true
+
+comments = true
 
 
 [assets]
@@ -40,9 +39,13 @@ safari_pinned_tab = "avatar.png"
 enabled = true
 url = "https://github.com/"
 imageUrl = "avatar.png"
-subtitle = "1234512"
-title = "What is mind? \n No matter. \nWhat is matter \nNever mind."
+info = ["What is mind? ", "No matter. ", "What is matter? ", "Never mind."]
+imageHeight = 250
+imageWidth = 250
 
+[[profileMode.buttons]]
+name = "blog"
+url = "/posts"
 
 [[socialIcons]]
 name = "github"
@@ -62,9 +65,3 @@ SiteVerificationTag = "XYZabc"
 
 [cover]
 hidden = true
-
-[utterances]
-enable = true
-repo = "asukaonly/blog-comments"
-issueTerm = "pathname"
-theme = "github-light"
