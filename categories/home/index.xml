@@ -108,18 +108,5 @@
 &lt;h3 id=&#34;软路由&#34;&gt;软路由&lt;/h3&gt;
 &lt;p&gt;我在ESXi上虚拟化运行OpenWrt，主要出于以下考虑：&lt;/p&gt;</description>
     </item>
-    <item>
-      <title>家庭网络改造2024整理目录</title>
-      <link>https://example.org/posts/home/%E5%AE%B6%E5%BA%AD%E7%BD%91%E7%BB%9C%E6%94%B9%E9%80%A0%E7%9B%AE%E5%BD%95/</link>
-      <pubDate>Sun, 09 Feb 2025 13:09:05 +0000</pubDate>
-      <guid>https://example.org/posts/home/%E5%AE%B6%E5%BA%AD%E7%BD%91%E7%BB%9C%E6%94%B9%E9%80%A0%E7%9B%AE%E5%BD%95/</guid>
-      <description>&lt;p&gt;从2023年搬入新家，断断续续做家庭网络改造持续了2年，这里整理下我在改造过程中的一些内容，先记录下目录。&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;家庭整体网络设计方案&lt;/li&gt;
-&lt;li&gt;软路由方案&lt;/li&gt;
-&lt;li&gt;家庭服务器方案&lt;/li&gt;
-&lt;li&gt;智能家居方案&lt;/li&gt;
-&lt;/ol&gt;</description>
-    </item>
   </channel>
 </rss>
