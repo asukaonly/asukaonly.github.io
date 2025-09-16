@@ -2,29 +2,29 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Categories on 404 NOT FOUND</title>
-    <link>https://example.org/categories/</link>
+    <link>https://https://asukaonly.github.io/categories/</link>
     <description>Recent content in Categories on 404 NOT FOUND</description>
     <image>
       <title>404 NOT FOUND</title>
-      <url>https://example.org/avatar.png</url>
-      <link>https://example.org/avatar.png</link>
+      <url>https://https:/avatar.png</url>
+      <link>https://https:/avatar.png</link>
     </image>
     <generator>Hugo -- 0.150.0</generator>
     <language>en-us</language>
     <lastBuildDate>Sat, 09 Aug 2025 20:09:05 +0000</lastBuildDate>
-    <atom:link href="https://example.org/categories/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://https://asukaonly.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Home</title>
-      <link>https://example.org/categories/home/</link>
+      <link>https://https://asukaonly.github.io/categories/home/</link>
       <pubDate>Sat, 09 Aug 2025 20:09:05 +0000</pubDate>
-      <guid>https://example.org/categories/home/</guid>
+      <guid>https://https://asukaonly.github.io/categories/home/</guid>
       <description></description>
     </item>
     <item>
       <title>Program</title>
-      <link>https://example.org/categories/program/</link>
+      <link>https://https://asukaonly.github.io/categories/program/</link>
       <pubDate>Sat, 20 Jan 2018 15:52:41 +0000</pubDate>
-      <guid>https://example.org/categories/program/</guid>
+      <guid>https://https://asukaonly.github.io/categories/program/</guid>
       <description></description>
     </item>
   </channel>

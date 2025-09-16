@@ -2,36 +2,36 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Tags on 404 NOT FOUND</title>
-    <link>https://example.org/tags/</link>
+    <link>https://https://asukaonly.github.io/tags/</link>
     <description>Recent content in Tags on 404 NOT FOUND</description>
     <image>
       <title>404 NOT FOUND</title>
-      <url>https://example.org/avatar.png</url>
-      <link>https://example.org/avatar.png</link>
+      <url>https://https:/avatar.png</url>
+      <link>https://https:/avatar.png</link>
     </image>
     <generator>Hugo -- 0.150.0</generator>
     <language>en-us</language>
     <lastBuildDate>Sat, 09 Aug 2025 20:09:05 +0000</lastBuildDate>
-    <atom:link href="https://example.org/tags/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://https://asukaonly.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Home</title>
-      <link>https://example.org/tags/home/</link>
+      <link>https://https://asukaonly.github.io/tags/home/</link>
       <pubDate>Sat, 09 Aug 2025 20:09:05 +0000</pubDate>
-      <guid>https://example.org/tags/home/</guid>
+      <guid>https://https://asukaonly.github.io/tags/home/</guid>
       <description></description>
     </item>
     <item>
       <title>Backend</title>
-      <link>https://example.org/tags/backend/</link>
+      <link>https://https://asukaonly.github.io/tags/backend/</link>
       <pubDate>Sat, 20 Jan 2018 15:52:41 +0000</pubDate>
-      <guid>https://example.org/tags/backend/</guid>
+      <guid>https://https://asukaonly.github.io/tags/backend/</guid>
       <description></description>
     </item>
     <item>
       <title>Program</title>
-      <link>https://example.org/tags/program/</link>
+      <link>https://https://asukaonly.github.io/tags/program/</link>
       <pubDate>Sat, 20 Jan 2018 15:52:41 +0000</pubDate>
-      <guid>https://example.org/tags/program/</guid>
+      <guid>https://https://asukaonly.github.io/tags/program/</guid>
       <description></description>
     </item>
   </channel>
