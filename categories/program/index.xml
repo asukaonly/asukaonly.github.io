@@ -9,7 +9,7 @@
       <url>https://example.org/avatar.png</url>
       <link>https://example.org/avatar.png</link>
     </image>
-    <generator>Hugo -- 0.149.1</generator>
+    <generator>Hugo -- 0.150.0</generator>
     <language>en-us</language>
     <lastBuildDate>Sat, 20 Jan 2018 15:52:41 +0000</lastBuildDate>
     <atom:link href="https://example.org/categories/program/index.xml" rel="self" type="application/rss+xml" />
@@ -331,7 +331,8 @@
 &lt;li&gt;无状态mvc框架，拓展性良好&lt;/li&gt;
 &lt;li&gt;简单的路由设置&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;这里附上Play framework的文档地址，官方有更为详尽的功能叙述。&lt;a href=&#34;https://www.playframework.com/documentation/1.2.x/overview&#34; title=&#34;文档&#34;&gt;Play framework文档&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;这里附上Play framework的文档地址，官方有更为详尽的功能叙述。&lt;a href=&#34;https://www.playframework.com/documentation/1.2.x/overview&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Play framework文档&lt;/a&gt;&lt;/p&gt;
 &lt;hr&gt;
 &lt;!-- more --&gt;
 &lt;h1 id=&#34;项目构成&#34;&gt;项目构成&lt;/h1&gt;
@@ -365,9 +366,7 @@ application.py的主要作用为解析项目路径下conf/中的配置文件、�
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;命令参数的分隔由以下代码完成，例如使用了play run &amp;ndash;%test,那么参数列表就是&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;[&amp;ldquo;xxxx\play&amp;rdquo;,&amp;ldquo;run&amp;rdquo;,&amp;quot;&amp;ndash;%test&amp;quot;]&lt;/p&gt;&lt;/blockquote&gt;
-&lt;p&gt;这段代码也说明了，play的命令格式为&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;play cmd [app_path] [&amp;ndash;options]&lt;/p&gt;</description>
+&lt;p&gt;这段代码也说明了，play的命令格式为&lt;/p&gt;</description>
     </item>
     <item>
       <title>Play framework源码解析目录</title>
