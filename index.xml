@@ -2,28 +2,28 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>404 NOT FOUND</title>
-    <link>https://https://asukaonly.github.io/</link>
+    <link>https://asukaonly.github.io/</link>
     <description>Recent content on 404 NOT FOUND</description>
     <image>
       <title>404 NOT FOUND</title>
-      <url>https://https:/avatar.png</url>
-      <link>https://https:/avatar.png</link>
+      <url>https://asukaonly.github.io/avatar.png</url>
+      <link>https://asukaonly.github.io/avatar.png</link>
     </image>
     <generator>Hugo -- 0.150.0</generator>
     <language>en-us</language>
     <lastBuildDate>Sat, 09 Aug 2025 20:09:05 +0000</lastBuildDate>
-    <atom:link href="https://https://asukaonly.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://asukaonly.github.io/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>家庭网络设计方案：从理想到实践的两年演进</title>
-      <link>https://https://asukaonly.github.io/posts/home/%E5%AE%B6%E5%BA%AD%E6%95%B4%E4%BD%93%E7%BD%91%E7%BB%9C%E8%AE%BE%E8%AE%A1%E6%96%B9%E6%A1%88/</link>
+      <link>https://asukaonly.github.io/posts/home/%E5%AE%B6%E5%BA%AD%E6%95%B4%E4%BD%93%E7%BD%91%E7%BB%9C%E8%AE%BE%E8%AE%A1%E6%96%B9%E6%A1%88/</link>
       <pubDate>Sat, 09 Aug 2025 20:09:05 +0000</pubDate>
-      <guid>https://https://asukaonly.github.io/posts/home/%E5%AE%B6%E5%BA%AD%E6%95%B4%E4%BD%93%E7%BD%91%E7%BB%9C%E8%AE%BE%E8%AE%A1%E6%96%B9%E6%A1%88/</guid>
+      <guid>https://asukaonly.github.io/posts/home/%E5%AE%B6%E5%BA%AD%E6%95%B4%E4%BD%93%E7%BD%91%E7%BB%9C%E8%AE%BE%E8%AE%A1%E6%96%B9%E6%A1%88/</guid>
       <description>&lt;h1 id=&#34;前言&#34;&gt;前言&lt;/h1&gt;
 &lt;p&gt;早在毕业后的租房时期，我就时常期待拥有自己的家后要如何改造家庭网络。每次看到网上博主分享内网万兆传输、服务器机柜、NAS 阵列等内容，都不禁心生羡慕。2023年新家入住后，我对家庭网络的改造断断续续持续了两年。到了2025年，终于是时候对这段历程做一些总结了。&lt;/p&gt;
 &lt;p&gt;这篇文章将重点回顾这两年来家庭网络结构的演进过程及背后的思考。&lt;/p&gt;
 &lt;h1 id=&#34;房屋结构和网络需求&#34;&gt;房屋结构和网络需求&lt;/h1&gt;
 &lt;p&gt;房屋为精装交付，出于成本考虑，入住时未对结构进行大幅改造（这也为后续网络改造埋下了一些隐患😭）。简略结构如下：&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;https://https://asukaonly.github.io/img/%E5%AE%B6%E5%BA%AD%E7%BD%91%E7%BB%9C/%E6%88%BF%E5%B1%8B%E7%BB%93%E6%9E%84.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;https://asukaonly.github.io/img/%E5%AE%B6%E5%BA%AD%E7%BD%91%E7%BB%9C/%E6%88%BF%E5%B1%8B%E7%BB%93%E6%9E%84.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;入住前暴露的主要问题有以下几点：&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;弱电箱嵌入在进门鞋柜内，空间非常有限，难以容纳较多设备，散热也较差。&lt;/li&gt;
@@ -92,7 +92,7 @@
 &lt;h1 id=&#34;2023年从零搭建先跑起来&#34;&gt;2023年：从零搭建，先跑起来&lt;/h1&gt;
 &lt;h2 id=&#34;物理拓扑&#34;&gt;物理拓扑&lt;/h2&gt;
 &lt;p&gt;2023年的主题是建设，在入住后不久，我便设计了如下的网络拓扑：
-&lt;img loading=&#34;lazy&#34; src=&#34;https://https://asukaonly.github.io/img/%E5%AE%B6%E5%BA%AD%E7%BD%91%E7%BB%9C/2023-%E7%BD%91%E7%BB%9C%E6%8B%93%E6%89%91.png&#34;&gt;&lt;/p&gt;
+&lt;img loading=&#34;lazy&#34; src=&#34;https://asukaonly.github.io/img/%E5%AE%B6%E5%BA%AD%E7%BD%91%E7%BB%9C/2023-%E7%BD%91%E7%BB%9C%E6%8B%93%E6%89%91.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;可以看到这里用了不太常见的单臂路由作为主路由连接方案，并不是因为软路由只有一个网口，纯粹是当时考虑如果软路由放在弱电箱内散热不太好。&lt;/p&gt;
 &lt;p&gt;我的主要网络设备如下：&lt;/p&gt;
 &lt;ul&gt;
@@ -104,15 +104,15 @@
 &lt;p&gt;硬件配置上普普通通，甚至有些富裕。当然，在闲鱼淘的交换机还是带起了后续的一些变化（笑&lt;/p&gt;
 &lt;h2 id=&#34;系统架构&#34;&gt;系统架构&lt;/h2&gt;
 &lt;p&gt;系统拓扑如下图所示
-&lt;img loading=&#34;lazy&#34; src=&#34;https://https://asukaonly.github.io/img/%E5%AE%B6%E5%BA%AD%E7%BD%91%E7%BB%9C/2023-%E7%B3%BB%E7%BB%9F%E6%8B%93%E6%89%91.jpg&#34;&gt;&lt;/p&gt;
+&lt;img loading=&#34;lazy&#34; src=&#34;https://asukaonly.github.io/img/%E5%AE%B6%E5%BA%AD%E7%BD%91%E7%BB%9C/2023-%E7%B3%BB%E7%BB%9F%E6%8B%93%E6%89%91.jpg&#34;&gt;&lt;/p&gt;
 &lt;h3 id=&#34;软路由&#34;&gt;软路由&lt;/h3&gt;
 &lt;p&gt;我在ESXi上虚拟化运行OpenWrt，主要出于以下考虑：&lt;/p&gt;</description>
     </item>
     <item>
       <title>Play framework源码解析 Part3:Play的初始化与启动</title>
-      <link>https://https://asukaonly.github.io/posts/play-framework/part3play%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96%E4%B8%8E%E5%90%AF%E5%8A%A8/</link>
+      <link>https://asukaonly.github.io/posts/play-framework/part3play%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96%E4%B8%8E%E5%90%AF%E5%8A%A8/</link>
       <pubDate>Sat, 20 Jan 2018 15:52:41 +0000</pubDate>
-      <guid>https://https://asukaonly.github.io/posts/play-framework/part3play%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96%E4%B8%8E%E5%90%AF%E5%8A%A8/</guid>
+      <guid>https://asukaonly.github.io/posts/play-framework/part3play%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96%E4%B8%8E%E5%90%AF%E5%8A%A8/</guid>
       <description>&lt;p&gt;在上一篇中，我们分析了play的2种启动方式，这一篇，我们来看看Play类的初始化过程&lt;/p&gt;
 &lt;!-- more --&gt;
 &lt;h1 id=&#34;play类&#34;&gt;Play类&lt;/h1&gt;
@@ -254,9 +254,9 @@
     </item>
     <item>
       <title>Play framework源码解析 Part2:Server与ServletWrapper</title>
-      <link>https://https://asukaonly.github.io/posts/play-framework/part2server%E4%B8%8Eservletwrapper/</link>
+      <link>https://asukaonly.github.io/posts/play-framework/part2server%E4%B8%8Eservletwrapper/</link>
       <pubDate>Thu, 11 Jan 2018 15:16:54 +0000</pubDate>
-      <guid>https://https://asukaonly.github.io/posts/play-framework/part2server%E4%B8%8Eservletwrapper/</guid>
+      <guid>https://asukaonly.github.io/posts/play-framework/part2server%E4%B8%8Eservletwrapper/</guid>
       <description>&lt;p&gt;在上一节中我们剖析了Play framework的启动原理，很容易就能发现Play framework的启动主入口在play.server.Server中，在本节，我们来一起看看Server类中主要发生了什么。&lt;/p&gt;
 &lt;h1 id=&#34;server类&#34;&gt;Server类&lt;/h1&gt;
 &lt;p&gt;既然是程序运行的主入口，那么必然是由main方法进入的，Server类中的main方法十分简单。源码如下:&lt;/p&gt;
@@ -412,9 +412,9 @@
     </item>
     <item>
       <title>Play framework源码解析 Part1: Play framework 介绍、项目构成及启动脚本解析</title>
-      <link>https://https://asukaonly.github.io/posts/play-framework/part1-play-framework-%E4%BB%8B%E7%BB%8D%E9%A1%B9%E7%9B%AE%E6%9E%84%E6%88%90%E5%8F%8A%E5%90%AF%E5%8A%A8%E8%84%9A%E6%9C%AC%E8%A7%A3%E6%9E%90/</link>
+      <link>https://asukaonly.github.io/posts/play-framework/part1-play-framework-%E4%BB%8B%E7%BB%8D%E9%A1%B9%E7%9B%AE%E6%9E%84%E6%88%90%E5%8F%8A%E5%90%AF%E5%8A%A8%E8%84%9A%E6%9C%AC%E8%A7%A3%E6%9E%90/</link>
       <pubDate>Wed, 03 Jan 2018 13:56:21 +0000</pubDate>
-      <guid>https://https://asukaonly.github.io/posts/play-framework/part1-play-framework-%E4%BB%8B%E7%BB%8D%E9%A1%B9%E7%9B%AE%E6%9E%84%E6%88%90%E5%8F%8A%E5%90%AF%E5%8A%A8%E8%84%9A%E6%9C%AC%E8%A7%A3%E6%9E%90/</guid>
+      <guid>https://asukaonly.github.io/posts/play-framework/part1-play-framework-%E4%BB%8B%E7%BB%8D%E9%A1%B9%E7%9B%AE%E6%9E%84%E6%88%90%E5%8F%8A%E5%90%AF%E5%8A%A8%E8%84%9A%E6%9C%AC%E8%A7%A3%E6%9E%90/</guid>
       <description>&lt;p&gt;&lt;font color=#DC143C &gt;注：本系列文章所用play版本为1.2.6&lt;/font&gt;&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1 id=&#34;介绍&#34;&gt;介绍&lt;/h1&gt;
@@ -465,9 +465,9 @@ application.py的主要作用为解析项目路径下conf/中的配置文件、�
     </item>
     <item>
       <title>Play framework源码解析目录</title>
-      <link>https://https://asukaonly.github.io/posts/play-framework/play-framework%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90%E7%9B%AE%E5%BD%95/</link>
+      <link>https://asukaonly.github.io/posts/play-framework/play-framework%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90%E7%9B%AE%E5%BD%95/</link>
       <pubDate>Mon, 01 Jan 2018 13:09:05 +0000</pubDate>
-      <guid>https://https://asukaonly.github.io/posts/play-framework/play-framework%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90%E7%9B%AE%E5%BD%95/</guid>
+      <guid>https://asukaonly.github.io/posts/play-framework/play-framework%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90%E7%9B%AE%E5%BD%95/</guid>
       <description>&lt;p&gt;这里对Play framework源码解析做一个大致规划目录，要写的篇章如下&lt;/p&gt;
 &lt;!-- more --&gt;
 &lt;h1 id=&#34;目录&#34;&gt;目录&lt;/h1&gt;
