@@ -3,6 +3,7 @@ title = 'Play framework源码解析 Part3:Play的初始化与启动'
 date = 2018-01-20 15:52:41
 tags = ["program","backend"]
 categories = ["program"] 
+slug = 'Part3'
 +++
 
 在上一篇中，我们分析了play的2种启动方式，这一篇，我们来看看Play类的初始化过程

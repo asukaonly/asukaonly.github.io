@@ -3,6 +3,7 @@ title = 'Play framework源码解析 Part2:Server与ServletWrapper'
 date = 2018-01-11 15:16:54
 tags = ["program","backend"]
 categories = ["program"] 
+slug = 'Part2'
 +++
 
 在上一节中我们剖析了Play framework的启动原理，很容易就能发现Play framework的启动主入口在play.server.Server中，在本节，我们来一起看看Server类中主要发生了什么。

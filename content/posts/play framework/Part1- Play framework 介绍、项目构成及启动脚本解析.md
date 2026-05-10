@@ -3,6 +3,7 @@ title = 'Play framework源码解析 Part1: Play framework 介绍、项目构成�
 date = 2018-01-03 13:56:21
 tags = ["program","backend"]
 categories = ["program"] 
+slug = 'Part1'
 +++
 
 <font color=#DC143C >注：本系列文章所用play版本为1.2.6</font>
