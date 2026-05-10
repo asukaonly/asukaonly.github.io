@@ -9,15 +9,15 @@
       <url>https://asukaonly.github.io/avatar.png</url>
       <link>https://asukaonly.github.io/avatar.png</link>
     </image>
-    <generator>Hugo -- 0.150.0</generator>
+    <generator>Hugo -- 0.161.1</generator>
     <language>en-us</language>
     <lastBuildDate>Sat, 20 Jan 2018 15:52:41 +0000</lastBuildDate>
     <atom:link href="https://asukaonly.github.io/categories/program/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Play framework源码解析 Part3:Play的初始化与启动</title>
-      <link>https://asukaonly.github.io/posts/play-framework/part3play%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96%E4%B8%8E%E5%90%AF%E5%8A%A8/</link>
+      <link>https://asukaonly.github.io/posts/play-framework/part3/</link>
       <pubDate>Sat, 20 Jan 2018 15:52:41 +0000</pubDate>
-      <guid>https://asukaonly.github.io/posts/play-framework/part3play%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96%E4%B8%8E%E5%90%AF%E5%8A%A8/</guid>
+      <guid>https://asukaonly.github.io/posts/play-framework/part3/</guid>
       <description>&lt;p&gt;在上一篇中，我们分析了play的2种启动方式，这一篇，我们来看看Play类的初始化过程&lt;/p&gt;
 &lt;!-- more --&gt;
 &lt;h1 id=&#34;play类&#34;&gt;Play类&lt;/h1&gt;
@@ -26,7 +26,7 @@
 &lt;img alt=&#34;Play类的方法列表&#34; loading=&#34;lazy&#34; src=&#34;https://s1.ax1x.com/2018/02/01/9FqoHU.png&#34;&gt;
 这其中加注释的几个方法是比较重要的，我们下面便来从init开始一点点剖析Play类中的各个方法。&lt;/p&gt;
 &lt;h1 id=&#34;play的初始化&#34;&gt;Play的初始化&lt;/h1&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;static&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;init&lt;/span&gt;(File root, String id) {
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;static&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;init&lt;/span&gt;(File root, String id) {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;// Simple things&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    Play.&lt;span style=&#34;color:#a6e22e&#34;&gt;id&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; id;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    Play.&lt;span style=&#34;color:#a6e22e&#34;&gt;started&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;false&lt;/span&gt;;
@@ -159,14 +159,14 @@
     </item>
     <item>
       <title>Play framework源码解析 Part2:Server与ServletWrapper</title>
-      <link>https://asukaonly.github.io/posts/play-framework/part2server%E4%B8%8Eservletwrapper/</link>
+      <link>https://asukaonly.github.io/posts/play-framework/part2/</link>
       <pubDate>Thu, 11 Jan 2018 15:16:54 +0000</pubDate>
-      <guid>https://asukaonly.github.io/posts/play-framework/part2server%E4%B8%8Eservletwrapper/</guid>
+      <guid>https://asukaonly.github.io/posts/play-framework/part2/</guid>
       <description>&lt;p&gt;在上一节中我们剖析了Play framework的启动原理，很容易就能发现Play framework的启动主入口在play.server.Server中，在本节，我们来一起看看Server类中主要发生了什么。&lt;/p&gt;
 &lt;h1 id=&#34;server类&#34;&gt;Server类&lt;/h1&gt;
 &lt;p&gt;既然是程序运行的主入口，那么必然是由main方法进入的，Server类中的main方法十分简单。源码如下:&lt;/p&gt;
 &lt;!-- more --&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;static&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;main&lt;/span&gt;(String&lt;span style=&#34;color:#f92672&#34;&gt;[]&lt;/span&gt; args) &lt;span style=&#34;color:#66d9ef&#34;&gt;throws&lt;/span&gt; Exception {
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;static&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;main&lt;/span&gt;(String&lt;span style=&#34;color:#f92672&#34;&gt;[]&lt;/span&gt; args) &lt;span style=&#34;color:#66d9ef&#34;&gt;throws&lt;/span&gt; Exception {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    File root &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;new&lt;/span&gt; File(System.&lt;span style=&#34;color:#a6e22e&#34;&gt;getProperty&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;application.path&amp;#34;&lt;/span&gt;));
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;//获取参数中的precompiled&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (System.&lt;span style=&#34;color:#a6e22e&#34;&gt;getProperty&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;precompiled&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;false&amp;#34;&lt;/span&gt;).&lt;span style=&#34;color:#a6e22e&#34;&gt;equals&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;true&amp;#34;&lt;/span&gt;)) {
@@ -197,7 +197,7 @@
 &lt;p&gt;这其中最重要的便是Play类的初始化以及Server类的初始化
 这里我们先来看Server类的初始化过程，现在可以先简单的将Play类的初始化理解为Play框架中一些常量的初始化以及日志、配置文件、路由信息等配置的读取。
 这里贴一下Server类的初始化过程：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Server&lt;/span&gt;(String&lt;span style=&#34;color:#f92672&#34;&gt;[]&lt;/span&gt; args) {
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Server&lt;/span&gt;(String&lt;span style=&#34;color:#f92672&#34;&gt;[]&lt;/span&gt; args) {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;//设置文件编码为UTF-8&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    System.&lt;span style=&#34;color:#a6e22e&#34;&gt;setProperty&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;file.encoding&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;utf-8&amp;#34;&lt;/span&gt;);
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;//p为Play类初始化过程中读取的配置文件信息&lt;/span&gt;
@@ -317,9 +317,9 @@
     </item>
     <item>
       <title>Play framework源码解析 Part1: Play framework 介绍、项目构成及启动脚本解析</title>
-      <link>https://asukaonly.github.io/posts/play-framework/part1-play-framework-%E4%BB%8B%E7%BB%8D%E9%A1%B9%E7%9B%AE%E6%9E%84%E6%88%90%E5%8F%8A%E5%90%AF%E5%8A%A8%E8%84%9A%E6%9C%AC%E8%A7%A3%E6%9E%90/</link>
+      <link>https://asukaonly.github.io/posts/play-framework/part1/</link>
       <pubDate>Wed, 03 Jan 2018 13:56:21 +0000</pubDate>
-      <guid>https://asukaonly.github.io/posts/play-framework/part1-play-framework-%E4%BB%8B%E7%BB%8D%E9%A1%B9%E7%9B%AE%E6%9E%84%E6%88%90%E5%8F%8A%E5%90%AF%E5%8A%A8%E8%84%9A%E6%9C%AC%E8%A7%A3%E6%9E%90/</guid>
+      <guid>https://asukaonly.github.io/posts/play-framework/part1/</guid>
       <description>&lt;p&gt;&lt;font color=#DC143C &gt;注：本系列文章所用play版本为1.2.6&lt;/font&gt;&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1 id=&#34;介绍&#34;&gt;介绍&lt;/h1&gt;
@@ -340,7 +340,7 @@
 自动生成的项目结构如下：&lt;/p&gt;
 &lt;p&gt;&lt;img alt=&#34;play项目结构&#34; loading=&#34;lazy&#34; src=&#34;https://i.loli.net/2018/01/08/5a53879bec91f.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;运行play程序也非常简单，在项目目录下使用&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;play run
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;play run
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;即可运行。&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1 id=&#34;启动脚本解析&#34;&gt;启动脚本解析&lt;/h1&gt;
@@ -352,21 +352,24 @@
 &lt;p&gt;play脚本在开头引入了3个类，分别为play.cmdloader,play.application,play.utils，从添加的系统参数中可以看出play启动脚本的存放路径为 framework/pym
 cmdloader.py的主要作用为加载framework/pym/commands下的各个脚本文件，用于之后对命令参数的解释运行
 application.py的主要作用为解析项目路径下conf/中的配置文件、加载模块、拼接最后运行的java命令&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sys&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;path&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;append(os&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;path&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;join(os&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;path&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;dirname(os&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;path&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;realpath(sys&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;argv[&lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;])), &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;framework&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;pym&amp;#39;&lt;/span&gt;))
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sys&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;path&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;append(os&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;path&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;join(os&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;path&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;dirname(os&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;path&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;realpath(sys&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;argv[&lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;])), &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;framework&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;pym&amp;#39;&lt;/span&gt;))
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;from&lt;/span&gt; play.cmdloader &lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; CommandLoader
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;from&lt;/span&gt; play.application &lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; PlayApplication
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;from&lt;/span&gt; play.utils &lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;在脚本的开头，有这么一段代码，意味着只要在play主程序根目录下创建一个名为id的文件，即可设置默认的框架id&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;play_env[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;id_file&amp;#34;&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; os&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;path&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;join(play_env[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;basedir&amp;#39;&lt;/span&gt;], &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;id&amp;#39;&lt;/span&gt;)
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;play_env[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;id_file&amp;#34;&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; os&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;path&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;join(play_env[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;basedir&amp;#39;&lt;/span&gt;], &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;id&amp;#39;&lt;/span&gt;)
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; os&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;path&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;exists(play_env[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;id_file&amp;#34;&lt;/span&gt;]):
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    play_env[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;id&amp;#34;&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; open(play_env[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;id_file&amp;#34;&lt;/span&gt;])&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;readline()&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;strip()
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt;:
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    play_env[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;id&amp;#34;&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;命令参数的分隔由以下代码完成，例如使用了play run &amp;ndash;%test,那么参数列表就是&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;[&amp;ldquo;xxxx\play&amp;rdquo;,&amp;ldquo;run&amp;rdquo;,&amp;quot;&amp;ndash;%test&amp;quot;]&lt;/p&gt;&lt;/blockquote&gt;
-&lt;p&gt;这段代码也说明了，play的命令格式为&lt;/p&gt;</description>
+&lt;p&gt;[&amp;ldquo;xxxx\play&amp;rdquo;,&amp;ldquo;run&amp;rdquo;,&amp;quot;&amp;ndash;%test&amp;quot;]&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;这段代码也说明了，play的命令格式为&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;play cmd [app_path] [&amp;ndash;options]&lt;/p&gt;</description>
     </item>
     <item>
       <title>Play framework源码解析目录</title>
