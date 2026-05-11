@@ -14,7 +14,7 @@
     <lastBuildDate>Sun, 10 May 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://asukaonly.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Magi 记忆系统设计：从长期观察到可解释记忆</title>
+      <title>Magi 记忆系统设计：一个桌面 Agent 的长期记忆构建思路</title>
       <link>https://asukaonly.github.io/posts/ai/magi%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/</link>
       <pubDate>Sun, 10 May 2026 00:00:00 +0000</pubDate>
       <guid>https://asukaonly.github.io/posts/ai/magi%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/</guid>
