@@ -11,8 +11,102 @@
     </image>
     <generator>Hugo -- 0.161.1</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 09 Aug 2025 20:09:05 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 10 May 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://asukaonly.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Magi 记忆系统设计：从长期观察到可解释记忆</title>
+      <link>https://asukaonly.github.io/posts/ai/magi%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/</link>
+      <pubDate>Sun, 10 May 2026 00:00:00 +0000</pubDate>
+      <guid>https://asukaonly.github.io/posts/ai/magi%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/</guid>
+      <description>&lt;h1 id=&#34;前言&#34;&gt;前言&lt;/h1&gt;
+&lt;p&gt;在做 Magi 之前，我对 AI Agent 的记忆系统一直有一种比较矛盾的感觉：一方面，大家都说长期记忆很重要；另一方面，很多所谓的记忆实现，最后看起来又像是“把聊天记录切块丢进向量库”。&lt;/p&gt;
+&lt;p&gt;这个方案不能说完全没用，尤其在回答“我们之前聊过什么”这类问题时确实有效。但如果把场景放到 Magi 上，问题就变复杂了很多。&lt;/p&gt;
+&lt;p&gt;Magi 不是一个只活在聊天窗口里的助手。它的目标是作为一个桌面端 Agent，长期观察用户的日常活动，接收来自浏览器、日历、音乐、终端、Git、照片、系统使用情况等传感器的数据，再把这些碎片慢慢沉淀成可以回忆、可以总结、可以解释的长期记忆。&lt;/p&gt;
+&lt;p&gt;这就导致 Magi 的记忆系统需要解决的不只是“如何让模型记住用户说过的话”，而是：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;海量的本地活动数据应该怎么进入系统？&lt;/li&gt;
+&lt;li&gt;哪些数据只是噪声，哪些数据值得留下？&lt;/li&gt;
+&lt;li&gt;用户说的话、模型说的话、工具查到的事实、系统运行日志之间应该怎么区分？&lt;/li&gt;
+&lt;li&gt;当数据越来越多时，如何避免成本爆炸？&lt;/li&gt;
+&lt;li&gt;当记忆被用于回答问题时，如何知道它为什么得出这个结论？&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;本文会尝试从设计背景、需求、规模估算、分层模型、写入过程、污染防护、检索流程、维护策略和 Benchmark 这几个方面，系统梳理一下 Magi 记忆系统目前的设计思路。&lt;/p&gt;
+&lt;h1 id=&#34;为什么需要一个记忆系统&#34;&gt;为什么需要一个记忆系统&lt;/h1&gt;
+&lt;p&gt;如果只把 Agent 当作一个问答工具，那么记忆系统的重要性其实没有那么高。很多场景下，把最近几轮对话塞进上下文，再加一点 RAG，就已经能解决大部分问题。&lt;/p&gt;
+&lt;p&gt;但 Magi 面对的是另一类问题。&lt;/p&gt;
+&lt;p&gt;它不只是在某一刻回答一个问题，而是在长时间里陪伴用户完成工作、生活和自我回顾。它可能今天看到你在调试一个项目，明天看到你在查某个技术文档，周末看到你整理照片，下个月又发现你反复回到同一个主题上。&lt;/p&gt;
+&lt;p&gt;这些信息单独看都很小，甚至有些无聊。但当时间跨度拉长后，它们会形成另一种价值：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;我最近主要在忙什么？&lt;/li&gt;
+&lt;li&gt;我这一周的注意力被哪些事情占据？&lt;/li&gt;
+&lt;li&gt;我是不是反复卡在同一个问题上？&lt;/li&gt;
+&lt;li&gt;我最近对哪些主题产生了持续兴趣？&lt;/li&gt;
+&lt;li&gt;我上次处理类似问题时用了什么方法？&lt;/li&gt;
+&lt;li&gt;过去一段时间里，我的生活和工作状态发生了什么变化？&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这些问题不是单次聊天记录能回答的，也不是单个外部数据源能回答的。它们需要一个跨来源、跨时间、可压缩、可追溯的记忆系统。&lt;/p&gt;
+&lt;p&gt;从用户视角看，Magi 的记忆系统不只是为了让 Agent “更懂你”。我更希望它能帮助用户回到自己的生活里：把日常碎片重新组织起来，把被工具和信息流冲散的注意力还原成可回顾的时间线，让用户知道自己最近到底经历了什么。&lt;/p&gt;
+&lt;p&gt;这点和普通的知识库不太一样。知识库关注的是资料，记忆系统关注的是&lt;strong&gt;我和世界发生过什么关系&lt;/strong&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;magi-对记忆系统的需求&#34;&gt;Magi 对记忆系统的需求&lt;/h2&gt;
+&lt;p&gt;在真正设计之前，先列一下 Magi 对记忆系统的核心需求：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;需求&lt;/th&gt;
+          &lt;th&gt;必要性&lt;/th&gt;
+          &lt;th&gt;说明&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;本地优先&lt;/td&gt;
+          &lt;td&gt;必须&lt;/td&gt;
+          &lt;td&gt;桌面端会接触大量个人活动数据，默认上传到云端不可接受&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;多源接入&lt;/td&gt;
+          &lt;td&gt;必须&lt;/td&gt;
+          &lt;td&gt;聊天、浏览、日历、媒体、终端、Git、照片、系统活动都可能成为记忆来源&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;长期存储&lt;/td&gt;
+          &lt;td&gt;必须&lt;/td&gt;
+          &lt;td&gt;记忆跨度要覆盖天、周、月甚至年，而不是最近几轮对话&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;二次加工&lt;/td&gt;
+          &lt;td&gt;必须&lt;/td&gt;
+          &lt;td&gt;需要从原始事件中抽取实体、关系、状态、偏好和经历片段，形成结构化认知&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;可解释&lt;/td&gt;
+          &lt;td&gt;必须&lt;/td&gt;
+          &lt;td&gt;记忆结论需要能追溯到证据，而不是只返回一个模型总结&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;抗污染&lt;/td&gt;
+          &lt;td&gt;必须&lt;/td&gt;
+          &lt;td&gt;不能把模型猜测、检索回声、工具中间状态都写成用户事实&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;低成本&lt;/td&gt;
+          &lt;td&gt;必须&lt;/td&gt;
+          &lt;td&gt;桌面端不能无限调用大模型，也不能无限膨胀向量库&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;可维护&lt;/td&gt;
+          &lt;td&gt;很重要&lt;/td&gt;
+          &lt;td&gt;需要实体合并、去重、摘要、归档和遗忘机制&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;可扩展&lt;/td&gt;
+          &lt;td&gt;很重要&lt;/td&gt;
+          &lt;td&gt;传感器类型会持续增加，记忆系统不能为每个来源写一套特殊逻辑&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;这张表基本决定了后面的架构方向：Magi 不能只做一个“对话摘要 + 向量搜索”的轻量模块，它还需要把原始事件进一步加工成可维护、可追溯的结构化认知。因此它需要的是一个生命周期明确的本地记忆系统。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>家庭网络设计方案：从理想到实践的两年演进</title>
       <link>https://asukaonly.github.io/posts/home/%E5%AE%B6%E5%BA%AD%E6%95%B4%E4%BD%93%E7%BD%91%E7%BB%9C%E8%AE%BE%E8%AE%A1%E6%96%B9%E6%A1%88/</link>
