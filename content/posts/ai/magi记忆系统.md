@@ -1,5 +1,5 @@
 +++
-title = 'Magi 记忆系统设计：从长期观察到可解释记忆'
+title = 'Magi 记忆系统设计：一个桌面 Agent 的长期记忆构建思路'
 date = 2026-05-10 00:00:00
 tags = ["magi", "agent", "memory"]
 categories = ["magi"]
