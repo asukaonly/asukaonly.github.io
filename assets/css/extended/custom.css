@@ -1,3 +1,41 @@
 :root {
     --main-width: 1000px;
+    --code-block-bg: rgb(248, 250, 252);
+}
+
+.post-content .highlight:not(table),
+.post-content>pre {
+    background: var(--code-block-bg) !important;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.post-content .highlight pre,
+.post-content pre.chroma {
+    background: transparent !important;
+}
+
+.post-content pre code {
+    color: var(--content);
+    background: transparent !important;
+}
+
+.post-content .chroma,
+.post-content .chroma .line,
+.post-content .chroma .cl {
+    color: var(--content);
+    background: transparent !important;
+}
+
+.copy-code {
+    color: var(--secondary);
+    background: var(--theme);
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.copy-code:hover {
+    color: var(--primary);
+    background: var(--code-bg);
 }
