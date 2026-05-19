@@ -45,7 +45,7 @@
     margin: 0;
 }
 
-.active {
+.toc a.active {
     font-size: 110%;
     font-weight: 600;
 }
@@ -62,6 +62,38 @@
     /*目录显示高度*/
     max-height: 83vh;
     overflow-y: auto;
+}
+
+.toc .inner>ul {
+    padding-inline-start: 0;
+}
+
+.toc .inner>ul>li {
+    margin: 0.35rem 0 0.45rem;
+}
+
+.toc .inner>ul>li>a {
+    display: block;
+    color: var(--primary);
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.toc .inner>ul>li>ul {
+    margin-top: 0.35rem;
+    margin-bottom: 0.2rem;
+    padding-inline-start: 0.75rem;
+    border-left: 1px solid var(--border);
+}
+
+.toc .inner>ul>li>ul a {
+    color: var(--secondary);
+    font-size: 0.9rem;
+    font-weight: 400;
+}
+
+.toc .inner>ul>li>ul a.active {
+    color: var(--primary);
 }
 
 .toc .inner::-webkit-scrollbar-thumb {

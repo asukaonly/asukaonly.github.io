@@ -1,2 +1,8 @@
 [goldmark.renderer]
 unsafe = true
+
+[highlight]
+noClasses = false
+guessSyntax = true
+codeFences = true
+lineNos = false

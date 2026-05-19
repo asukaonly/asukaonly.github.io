@@ -3,6 +3,66 @@
     --code-block-bg: rgb(248, 250, 252);
 }
 
+/* ============================================================
+   标题层级重排：让 h3 / h4 / h5 形成清晰梯度
+   PaperMod 默认 h4=16px(同正文), h5=14px(比正文小), 视觉上
+   会被加粗内联文本压过去，失去层级感
+   ============================================================ */
+
+.post-content h3 {
+    font-size: 1.5rem;          /* ~24px */
+    line-height: 1.35;
+    margin-top: 2.6em;
+    margin-bottom: 1em;
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid var(--border);
+}
+
+.post-content h4 {
+    font-size: 1.2rem;          /* ~19px, 原 16px */
+    line-height: 1.4;
+    font-weight: 700;
+    margin-top: 2em;
+    margin-bottom: 0.7em;
+    color: var(--primary);
+}
+
+.post-content h5 {
+    font-size: 1.05rem;         /* ~17px, 原 14px */
+    line-height: 1.4;
+    font-weight: 600;
+    margin-top: 1.6em;
+    margin-bottom: 0.5em;
+    color: var(--primary);
+}
+
+.post-content h6 {
+    font-size: 0.92rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    margin-top: 1.4em;
+    margin-bottom: 0.4em;
+    color: var(--secondary);
+    text-transform: none;
+}
+
+/* 段内加粗：让它沉稳一些，不和小标题抢风头 */
+.post-content p strong,
+.post-content li strong {
+    font-weight: 600;
+}
+
+/* 独占一段的粗体（如 markdown 里 `**SPO 入库…**` 单独一行）：
+   给它额外的上方间距和主色提示，作为 h5/h6 之外的轻量小标题 */
+.post-content p > strong:only-child {
+    display: inline-block;
+    margin-top: 0.5em;
+    margin-bottom: 0.1em;
+    color: var(--primary);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
 .post-content .highlight:not(table),
 .post-content>pre {
     background: var(--code-block-bg) !important;
@@ -38,4 +98,172 @@
 .copy-code:hover {
     color: var(--primary);
     background: var(--code-bg);
+}
+
+/* ============================================================
+   Code block syntax highlighting (light theme)
+   GitHub Light 风格的 token 配色，适配白底代码块。
+   ============================================================ */
+
+/* JSON 键名 / XML tag 名 / label */
+.post-content .chroma .nt,
+.post-content .chroma .nl {
+    color: #0550ae;
+}
+
+/* 字符串 */
+.post-content .chroma .s,
+.post-content .chroma .s1,
+.post-content .chroma .s2,
+.post-content .chroma .sb,
+.post-content .chroma .sc,
+.post-content .chroma .sd,
+.post-content .chroma .se,
+.post-content .chroma .sh,
+.post-content .chroma .si,
+.post-content .chroma .sr,
+.post-content .chroma .ss,
+.post-content .chroma .sx {
+    color: #0a7b27;
+}
+
+/* 数字 */
+.post-content .chroma .m,
+.post-content .chroma .mb,
+.post-content .chroma .mf,
+.post-content .chroma .mh,
+.post-content .chroma .mi,
+.post-content .chroma .mo {
+    color: #b15c00;
+}
+
+/* 常量 true / false / null */
+.post-content .chroma .kc {
+    color: #cf222e;
+    font-weight: 600;
+}
+
+/* 关键字 */
+.post-content .chroma .k,
+.post-content .chroma .kd,
+.post-content .chroma .kn,
+.post-content .chroma .kp,
+.post-content .chroma .kr,
+.post-content .chroma .kt {
+    color: #cf222e;
+}
+
+/* 注释 */
+.post-content .chroma .c,
+.post-content .chroma .c1,
+.post-content .chroma .cm,
+.post-content .chroma .cp,
+.post-content .chroma .cs {
+    color: #6e7781;
+    font-style: italic;
+}
+
+/* 函数名 / 变量名 */
+.post-content .chroma .nf,
+.post-content .chroma .nx {
+    color: #8250df;
+}
+
+/* 内建符号 */
+.post-content .chroma .nb,
+.post-content .chroma .bp {
+    color: #953800;
+}
+
+/* 操作符 */
+.post-content .chroma .o,
+.post-content .chroma .ow {
+    color: #cf222e;
+}
+
+/* 标点（括号、逗号、冒号） */
+.post-content .chroma .p {
+    color: #24292f;
+}
+
+/* 错误标记不要红底 */
+.post-content .chroma .err {
+    color: #cf222e;
+    background-color: transparent;
+}
+
+/* 行内代码也提升一点对比度 */
+.post-content :not(pre) > code {
+    color: #24292f;
+    background: var(--code-block-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.1em 0.35em;
+}
+
+/* ============================================================
+   Dark theme override：换成 GitHub Dark 风格，避免暗色背景下不可读
+   ============================================================ */
+
+.dark .post-content .chroma .nt,
+.dark .post-content .chroma .nl {
+    color: #79c0ff;
+}
+
+.dark .post-content .chroma .s,
+.dark .post-content .chroma .s1,
+.dark .post-content .chroma .s2,
+.dark .post-content .chroma .sb,
+.dark .post-content .chroma .sc,
+.dark .post-content .chroma .sd,
+.dark .post-content .chroma .se,
+.dark .post-content .chroma .sh,
+.dark .post-content .chroma .si,
+.dark .post-content .chroma .sr,
+.dark .post-content .chroma .ss,
+.dark .post-content .chroma .sx {
+    color: #a5d6ff;
+}
+
+.dark .post-content .chroma .m,
+.dark .post-content .chroma .mb,
+.dark .post-content .chroma .mf,
+.dark .post-content .chroma .mh,
+.dark .post-content .chroma .mi,
+.dark .post-content .chroma .mo {
+    color: #f0883e;
+}
+
+.dark .post-content .chroma .kc,
+.dark .post-content .chroma .k,
+.dark .post-content .chroma .kd,
+.dark .post-content .chroma .kn,
+.dark .post-content .chroma .kp,
+.dark .post-content .chroma .kr,
+.dark .post-content .chroma .kt,
+.dark .post-content .chroma .o,
+.dark .post-content .chroma .ow {
+    color: #ff7b72;
+}
+
+.dark .post-content .chroma .c,
+.dark .post-content .chroma .c1,
+.dark .post-content .chroma .cm,
+.dark .post-content .chroma .cp,
+.dark .post-content .chroma .cs {
+    color: #8b949e;
+}
+
+.dark .post-content .chroma .nf,
+.dark .post-content .chroma .nx {
+    color: #d2a8ff;
+}
+
+.dark .post-content .chroma .nb,
+.dark .post-content .chroma .bp {
+    color: #ffa657;
+}
+
+.dark .post-content .chroma .p {
+    color: #c9d1d9;
 }
