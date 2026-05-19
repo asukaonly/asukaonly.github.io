@@ -11,8 +11,49 @@
     </image>
     <generator>Hugo -- 0.161.1</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 10 May 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 15 May 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://asukaonly.github.io/tags/magi/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Magi 记忆系统流程篇：从事件写入到证据检索</title>
+      <link>https://asukaonly.github.io/posts/ai/magi%E8%AE%B0%E5%BF%86%E5%86%99%E5%85%A5%E4%B8%8E%E6%A3%80%E7%B4%A2%E6%B5%81%E7%A8%8B/</link>
+      <pubDate>Fri, 15 May 2026 00:00:00 +0000</pubDate>
+      <guid>https://asukaonly.github.io/posts/ai/magi%E8%AE%B0%E5%BF%86%E5%86%99%E5%85%A5%E4%B8%8E%E6%A3%80%E7%B4%A2%E6%B5%81%E7%A8%8B/</guid>
+      <description>&lt;h2 id=&#34;tldr&#34;&gt;TL;DR&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;我在买空气炸锅前买了什么厨房家电？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;这是评测基准 LongMemEval 里的一道题。你看一眼大概就能答上来，但要让一个长期记忆系统答对，它得自己想明白：高压锅也算厨房家电、空气炸锅之后买的电饭煲不算数，还得忍住别把 AI 自己之前说过的话当成事实拿回来用。&lt;/p&gt;
+&lt;p&gt;这篇文章想讲清楚 Magi 是怎么干这件事的：&lt;strong&gt;一条记忆写进来的时候，就在标&amp;quot;以后能不能当证据&amp;quot;；问题来了的时候，就在挑&amp;quot;这一轮该信哪一批&amp;quot;。&lt;/strong&gt; 目前这条链路在 LongMemEval 上跑出 87.2%。&lt;/p&gt;
+&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://asukaonly.github.io/posts/ai/magi%e8%ae%b0%e5%bf%86%e7%b3%bb%e7%bb%9f/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;上一篇文章&lt;/a&gt; 里，我主要写了 Magi 为什么需要一套分层记忆系统：为什么不能把聊天记录、工具日志、浏览历史和传感器数据都粗暴塞进一个向量库；为什么要区分 L0 工作记忆、L1 事实事件、L2 结构化认知、L3 总结反思和 L4 过程经验；以及为什么记忆系统必须处理污染、过期、冲突和成本问题。&lt;/p&gt;
+&lt;p&gt;但那篇文章更多是在回答“记忆系统应该长什么样”。这一篇想继续往下看一个更工程化的问题：&lt;strong&gt;一条记忆到底是怎么写进去的，又是怎么被检索出来的？&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;这听起来像一个实现细节问题，但在长期记忆系统里，它其实非常关键。因为记忆质量不是检索阶段才决定的。写入时有没有标清来源，是否区分用户自述和 AI 回答，是否把运行日志挡在长期事实之外，是否把实体和关系慢慢沉淀出来，都会直接影响后面能不能正确回答问题。&lt;/p&gt;
+&lt;p&gt;换句话说，Magi 的记忆系统不是“先把文本存起来，以后再搜”。它更像一条证据流水线：写入阶段决定什么东西有资格成为证据，检索阶段决定当前这个问题应该相信哪一部分证据。&lt;/p&gt;
+&lt;p&gt;这篇文章就围绕这条流水线展开。为了让写入和检索不混在一起，下面会先用一个例子说明难点，再分成两条主线：&lt;strong&gt;写入路径负责把证据留下来，检索路径负责在问题出现时选择能信的证据&lt;/strong&gt;。最后再回到开头的例子，把整条链路走一遍。&lt;/p&gt;
+&lt;h2 id=&#34;记忆系统的难点&#34;&gt;记忆系统的难点&lt;/h2&gt;
+&lt;h3 id=&#34;一个看起来很简单的问题&#34;&gt;一个看起来很简单的问题&lt;/h3&gt;
+&lt;p&gt;先从一个例子开始。这也是 LongMemEval 里的一道例题，简化了一下题目如下：&lt;/p&gt;
+&lt;p&gt;假设记忆里有三天对话：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;第一天：我想用新的高压锅煲汤，有什么专为高压锅设计的食谱吗？
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;后面主要在讨论高压锅煲汤和食谱。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;第二天：我新买了一个空气炸锅，我觉得它很好用，你有什么推荐的食谱吗？
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;后面主要在讨论空气炸锅食谱。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;第三天：我买了一个电饭煲，有什么推荐的食谱吗？
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;后面主要在讨论电饭煲食谱。
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;然后用户问：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;我在买空气炸锅前买了什么厨房家电？
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这个问题对人来说很自然，答案应该是“高压锅”，正确答案就在第一天对话里。但对记忆检索系统来说，它其实一点都不简单。&lt;/p&gt;
+&lt;p&gt;第一，第一句话完全没有出现“空气炸锅”“买”“厨房家电”这些词。它只说了“新的高压锅”“煲汤”“食谱”。如果检索只靠关键词，这条记忆未必能被召回。&lt;/p&gt;
+&lt;p&gt;第二，语义上检索系统需要知道“高压锅”属于“厨房家电”。这是一种语义泛化，不是字面匹配。更细一点说，“新的高压锅”也不等于用户明确说“我买了高压锅”，但在上下文里它很可能是一个刚购买或刚开始使用的家电。&lt;/p&gt;
+&lt;p&gt;第三，系统还要处理时间顺序。第三天的“电饭煲”也是厨房家电，也明确出现了“买”，但它发生在空气炸锅之后，所以不能作为答案。也就是说，这个问题不是找最相似的文本，而是找“空气炸锅之前出现的厨房家电”。&lt;/p&gt;
+&lt;p&gt;第四，候选记忆之间还有干扰。三天内对话的大部分内容是食谱相关，大量的语义注意力被食谱侵占，靠检索很容易漏过多语义下的小细节。&lt;/p&gt;
+&lt;p&gt;这就是长期记忆检索最麻烦的地方：用户问的常常不是“哪段文本最像这个问题”，而是“过去发生过的一组事情之间，哪一个满足某些隐含条件”。&lt;/p&gt;
+&lt;p&gt;所以在讲 Magi 的实现之前，我想先把这个例子放到一个评测语境里看。类似的问题并不是个别刁钻 case，而是长期记忆问答里反复出现的基本题型。&lt;/p&gt;
+&lt;p&gt;目前 Magi 的记忆与检索链路已经接入 LongMemEval。在本地 SQLite 存储、千问 &lt;code&gt;text-embedding-v3&lt;/code&gt; 向量模型和 &lt;code&gt;Qwen3.5&lt;/code&gt; 回答模型下，当前总体准确率是 &lt;strong&gt;87.2%&lt;/strong&gt;。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Magi 记忆系统设计：一个桌面 Agent 的长期记忆构建思路</title>
       <link>https://asukaonly.github.io/posts/ai/magi%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/</link>
