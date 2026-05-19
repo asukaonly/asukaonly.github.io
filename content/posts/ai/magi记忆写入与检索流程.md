@@ -3,7 +3,6 @@ title = 'Magi 记忆系统流程篇：从事件写入到证据检索'
 date = 2026-05-15 00:00:00
 tags = ["magi", "agent", "memory"]
 categories = ["magi"]
-draft = true
 +++
 
 ## TL;DR
