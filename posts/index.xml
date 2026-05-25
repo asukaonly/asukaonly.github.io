@@ -11,8 +11,17 @@
     </image>
     <generator>Hugo -- 0.161.1</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Fri, 15 May 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 22 May 2026 11:00:00 +0000</lastBuildDate>
     <atom:link href="https://asukaonly.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>代理协议这十几年:从加密到借真实身份</title>
+      <link>https://asukaonly.github.io/posts/other/%E4%BB%A3%E7%90%86%E5%8D%8F%E8%AE%AE%E5%85%A8%E6%B5%81%E7%A8%8B%E8%A7%A3%E6%9E%90/</link>
+      <pubDate>Fri, 22 May 2026 11:00:00 +0000</pubDate>
+      <guid>https://asukaonly.github.io/posts/other/%E4%BB%A3%E7%90%86%E5%8D%8F%E8%AE%AE%E5%85%A8%E6%B5%81%E7%A8%8B%E8%A7%A3%E6%9E%90/</guid>
+      <description>&lt;h1 id=&#34;前言&#34;&gt;前言&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;声明&lt;/strong&gt;：本文为基于公开学术论文（IMC 2020、USENIX Security 2023 / 2024 等）和开源项目讨论的协议技术综述，目标是梳理各代代理协议在网络协议层的设计取舍与演化逻辑，不涉及任何具体配置教程、服务部署或工具推广，仅作网络协议技术研究学习参考。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Magi 记忆系统流程篇：从事件写入到证据检索</title>
       <link>https://asukaonly.github.io/posts/ai/magi%E8%AE%B0%E5%BF%86%E5%86%99%E5%85%A5%E4%B8%8E%E6%A3%80%E7%B4%A2%E6%B5%81%E7%A8%8B/</link>
